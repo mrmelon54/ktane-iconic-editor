@@ -1,0 +1,28 @@
+name: Build/release
+
+on: push
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v1
+
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v1
+        with:
+          node-version: 18
+
+      - run: yarn
+      - run: yarn build
+
+      - name: Archive
+        run: tar -czvf mrmelon54.com.tar.gz -C ./dist/client .
+      
+      - name: Test
+        run: tar -tzvf mrmelon54.com.tar.gz
+
+      - name: Release
+        run: 'curl -X POST -H "Authorization: Bearer ${{ secrets.DEPLOY }}" -F "upload=@mrmelon54.com.tar.gz" "https://sites.mrmelon54.com/u?site=mrmelon54.com&branch=${{ github.ref_name }}"'
