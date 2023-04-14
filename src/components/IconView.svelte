@@ -1,35 +1,40 @@
 <script lang="ts">
   import {onMount} from "svelte/internal";
 
+  let iconWrapper: HTMLDivElement;
   let C: HTMLCanvasElement;
+
+  window.addEventListener("resize", resizeCanvas);
+
+  function resizeCanvas() {
+    C.style.width = "0";
+    C.style.height = "0";
+    let w = iconWrapper.clientWidth;
+    let h = iconWrapper.clientHeight;
+    let s = w <= h ? w : h;
+    C.style.width = s + "px";
+    C.style.height = s + "px";
+    C.width = s;
+    C.height = s;
+  }
 
   onMount(() => {
     const ctx = C.getContext("2d");
     let frame = requestAnimationFrame(loop);
+    resizeCanvas();
 
     function loop() {
       frame = requestAnimationFrame(loop);
 
-      let t = 1;
+      let s = C.clientWidth / 32;
 
-      const imageData = ctx.getImageData(0, 0, C.width, C.height);
-
-      for (let p = 0; p < imageData.data.length; p += 4) {
-        const i = p / 4;
-        const x = i % C.width;
-        const y = (i / C.width) >>> 0;
-
-        const r = 64 + (128 * x) / C.width + 64 * Math.sin(t / 1000);
-        const g = 64 + (128 * y) / C.height + 64 * Math.cos(t / 1000);
-        const b = 128;
-
-        imageData.data[p + 0] = r;
-        imageData.data[p + 1] = g;
-        imageData.data[p + 2] = b;
-        imageData.data[p + 3] = 255;
+      for (let i = 0; i < 32; i++) {
+        for (let j = 0; j < 32; j++) {
+          if (i % 2 == j % 2) ctx.fillStyle = "red";
+          else ctx.fillStyle = "rebeccapurple";
+          ctx.fillRect(i * s, j * s, i * s + s, j * s + s);
+        }
       }
-
-      ctx.putImageData(imageData, 0, 0);
     }
 
     return () => {
@@ -39,7 +44,9 @@
 </script>
 
 <div id="icon-wrapper">
-  <canvas bind:this={C} id="icon" />
+  <div id="icon-size" bind:this={iconWrapper}>
+    <canvas bind:this={C} id="icon" />
+  </div>
 </div>
 
 <style lang="scss">
@@ -48,10 +55,16 @@
     width: 100%;
     box-sizing: border-box;
 
-    > #icon {
-      aspect-ratio: 1/1;
+    #icon-size {
       width: 100%;
-      background: lightcoral;
+      height: 100%;
+      overflow: hidden;
+
+      #icon {
+        aspect-ratio: 1/1;
+        background: lightcoral;
+        image-rendering: pixelated;
+      }
     }
   }
 </style>
