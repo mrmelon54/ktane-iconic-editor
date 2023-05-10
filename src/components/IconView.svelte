@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {onMount} from "svelte/internal";
+  import {debug, onMount} from "svelte/internal";
   import {get} from "svelte/store";
-  import {selectedModule} from "~/stores/editor-data";
-  import {iconicData} from "~/stores/iconic-data";
+  import {hoveredChar, selectedChar, selectedModule} from "~/stores/editor-data";
+  import {iconicData, type iconicDataType} from "~/stores/iconic-data";
 
   let iconWrapper: HTMLDivElement;
   let moduleIcon: HTMLImageElement = new Image(32, 32);
@@ -11,6 +11,14 @@
   let imData: ImageData;
   $: imPix = (x, y, i) => imData.data[y * 32 * 4 + x * 4 + i];
   let C: HTMLCanvasElement;
+  $: moduleRaw = getCurrentModuleString($iconicData, $selectedModule);
+  $: console.log(moduleRaw);
+
+  function getCurrentModuleString(iconicData: iconicDataType, selectedModule) {
+    let z = iconicData.modules[selectedModule];
+    if (z) return z.raw;
+    return " ".repeat(32 * 32);
+  }
 
   moduleIcon.addEventListener("load", () => {
     moduleCtx.clearRect(0, 0, 32, 32);
@@ -25,7 +33,7 @@
       moduleIcon.src = "about:blank";
       return;
     }
-    moduleIcon.src = "https://ktane.mrmelon54.com/Icons/" + module.key + ".png";
+    moduleIcon.src = "https://ktane-icons.mrmelon54.com/Module Icons/" + module.key + ".png";
   });
 
   window.addEventListener("resize", resizeCanvas);
@@ -52,12 +60,30 @@
       ctx.clearRect(0, 0, C.clientWidth, C.clientHeight);
 
       let s = Math.floor(C.clientWidth / 32);
+      let s2 = s / 2;
       let o = Math.floor((C.clientWidth - s * 32) / 2);
+      let selChar = $hoveredChar;
       if (imData) {
         for (let i = 0; i < 32; i++) {
           for (let j = 0; j < 32; j++) {
-            ctx.fillStyle = `rgba(${imPix(i, j, 0)},${imPix(i, j, 1)},${imPix(i, j, 2)},${imPix(i, j, 3)})`;
+            let z = [imPix(i, j, 0), imPix(i, j, 1), imPix(i, j, 2), imPix(i, j, 3)];
+            let r = moduleRaw[j * 32 + i];
+
+            ctx.fillStyle = `rgba(${z[0]},${z[1]},${z[2]},${z[3]})`;
             ctx.fillRect(i * s + o, j * s + o, s, s);
+
+            ctx.fillStyle = colorContrast(z[0], z[1], z[2]);
+            ctx.font = "16px Arial";
+            ctx.textBaseline = "middle";
+            ctx.fillText(r, i * s + s2 - 5 + o, j * s + s2 + o);
+
+            if (selChar == r) {
+              ctx.fillStyle = "yellow";
+              ctx.fillRect(i * s + o, j * s + o, s, 2);
+              ctx.fillRect(i * s + o, j * s + o, 2, s);
+              ctx.fillRect(i * s + o, (j + 1) * s + o - 2, s, 2);
+              ctx.fillRect((i + 1) * s + o - 2, j * s + o, 2, s);
+            }
           }
         }
       } else {
@@ -79,6 +105,13 @@
       cancelAnimationFrame(frame);
     };
   });
+
+  // Used algorithm from: https://stackoverflow.com/a/11868159
+  function colorContrast(r, g, b) {
+    // http://www.w3.org/TR/AERT#color-contrast
+    const brightness = Math.round((parseInt(r) * 299 + parseInt(g) * 587 + parseInt(b) * 114) / 1000);
+    return brightness > 125 ? "black" : "white";
+  }
 </script>
 
 <div id="icon-wrapper">

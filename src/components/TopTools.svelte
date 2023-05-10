@@ -77,6 +77,7 @@
 
       &.hovered {
         background-color: yellow;
+        color: black;
       }
 
       .part-color {
