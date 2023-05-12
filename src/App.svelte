@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {onMount} from "svelte";
   import BottomTools from "./components/BottomTools.svelte";
   import IconView from "./components/IconView.svelte";
   import TopTools from "./components/TopTools.svelte";
@@ -39,6 +40,18 @@
     let dt = e.dataTransfer;
     let files = dt.files;
     onFileSelected(files);
+  }
+
+  onMount(() => {
+    window.addEventListener("beforeunload", confirmExit);
+
+    return () => {
+      window.removeEventListener("beforeunload", confirmExit);
+    };
+  });
+
+  function confirmExit() {
+    return "You have attempted to leave this page. Are you sure?";
   }
 </script>
 

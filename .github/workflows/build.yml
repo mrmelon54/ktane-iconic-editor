@@ -19,7 +19,7 @@ jobs:
       - run: yarn build
 
       - name: Archive
-        run: tar -czvf iconic-editor.tar.gz -C ./dist .
+        run: tar -czvf deploy.tar.gz -C ./dist .
 
       - name: Release
-        run: 'curl -X POST -H "Authorization: Bearer ${{ secrets.DEPLOY }}" -F "upload=@iconic-editor.tar.gz" "https://sites.mrmelon54.com/u?site=iconic-editor.mrmelon54.com&branch=${{ github.ref_name }}"'
+        run: 'curl -X POST -H "Authorization: Bearer ${{ secrets.DEPLOY }}" -F "upload=@deploy.tar.gz" "https://sites.mrmelon54.com/u?site=ktane-iconic-editor.mrmelon54.com&branch=${{ github.ref_name }}"'

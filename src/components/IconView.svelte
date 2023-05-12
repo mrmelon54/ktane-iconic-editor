@@ -169,6 +169,7 @@
     return brightness > 125 ? "black" : "white";
   }
 
+  // https://stackoverflow.com/a/1431113
   function replaceAt(s: string, index: number, replacement: string) {
     return s.substring(0, index) + replacement + s.substring(index + replacement.length);
   }
