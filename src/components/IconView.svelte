@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {debug, onMount} from "svelte/internal";
+  import {onMount} from "svelte/internal";
   import {get} from "svelte/store";
   import {hoveredChar, selectedChar, selectedModule} from "~/stores/editor-data";
   import {iconicData, type iconicDataType} from "~/stores/iconic-data";
@@ -9,10 +9,13 @@
   let moduleCanvas: HTMLCanvasElement;
   $: moduleCtx = moduleCanvas ? moduleCanvas.getContext("2d") : undefined;
   let imData: ImageData;
-  $: imPix = (x, y, i) => imData.data[y * 32 * 4 + x * 4 + i];
+  $: imPix = (x: number, y: number, i: number) => imData.data[y * 32 * 4 + x * 4 + i];
   let C: HTMLCanvasElement;
   $: moduleRaw = getCurrentModuleString($iconicData, $selectedModule);
-  $: console.log(moduleRaw);
+
+  let mouseX = -1;
+  let mouseY = -1;
+  let mouseHeld = false;
 
   function getCurrentModuleString(iconicData: iconicDataType, selectedModule) {
     let z = iconicData.modules[selectedModule];
@@ -84,6 +87,14 @@
               ctx.fillRect(i * s + o, (j + 1) * s + o - 2, s, 2);
               ctx.fillRect((i + 1) * s + o - 2, j * s + o, 2, s);
             }
+
+            if (i === mouseX && j === mouseY) {
+              ctx.fillStyle = "green";
+              ctx.fillRect(i * s + o, j * s + o, s, 2);
+              ctx.fillRect(i * s + o, j * s + o, 2, s);
+              ctx.fillRect(i * s + o, (j + 1) * s + o - 2, s, 2);
+              ctx.fillRect((i + 1) * s + o - 2, j * s + o, 2, s);
+            }
           }
         }
       } else {
@@ -106,17 +117,74 @@
     };
   });
 
+  function canvasClick(ev) {
+    let {x, y} = getMouseXY(ev);
+    replaceModuleRawChar({x, y});
+  }
+
+  function canvasMouseMove(ev) {
+    let {x, y} = getMouseXY(ev);
+    [mouseX, mouseY] = [x, y];
+    if (mouseHeld) replaceModuleRawChar({x, y});
+  }
+
+  function canvasMouseDown(ev) {
+    let {x, y} = getMouseXY(ev);
+    [mouseX, mouseY] = [x, y];
+    mouseHeld = true;
+    replaceModuleRawChar({x, y});
+  }
+
+  function canvasMouseUp() {
+    mouseHeld = false;
+  }
+
+  function canvasMouseLeave() {
+    mouseHeld = false;
+    mouseX = -1;
+    mouseY = -1;
+  }
+
+  function replaceModuleRawChar({x, y}) {
+    if (x < 0 || y < 0 || x >= 32 || y >= 32) return;
+    moduleRaw = replaceAt(moduleRaw, y * 32 + x, $selectedChar);
+    iconicData.update(z => {
+      z.modules[$selectedModule].raw = moduleRaw;
+      return z;
+    });
+  }
+
+  function getMouseXY({layerX, layerY}) {
+    let s = Math.floor(C.clientWidth / 32);
+    let o = Math.floor((C.clientWidth - s * 32) / 2);
+    let x = Math.floor((layerX - o) / s);
+    let y = Math.floor((layerY - o) / s);
+    return {x, y};
+  }
+
   // Used algorithm from: https://stackoverflow.com/a/11868159
   function colorContrast(r, g, b) {
     // http://www.w3.org/TR/AERT#color-contrast
     const brightness = Math.round((parseInt(r) * 299 + parseInt(g) * 587 + parseInt(b) * 114) / 1000);
     return brightness > 125 ? "black" : "white";
   }
+
+  function replaceAt(s: string, index: number, replacement: string) {
+    return s.substring(0, index) + replacement + s.substring(index + replacement.length);
+  }
 </script>
 
 <div id="icon-wrapper">
   <div id="icon-size" bind:this={iconWrapper}>
-    <canvas bind:this={C} id="icon" />
+    <canvas
+      bind:this={C}
+      id="icon"
+      on:click={canvasClick}
+      on:mousemove={canvasMouseMove}
+      on:mousedown={canvasMouseDown}
+      on:mouseup={canvasMouseUp}
+      on:mouseleave={canvasMouseLeave}
+    />
     <canvas bind:this={moduleCanvas} id="module-icon-hidden" />
   </div>
 </div>

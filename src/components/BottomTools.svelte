@@ -42,7 +42,7 @@
     iconicData.update(x => {
       x.modules.push({
         key,
-        raw: "",
+        raw: " ".repeat(32 * 32),
         parts: [],
       });
       return x;

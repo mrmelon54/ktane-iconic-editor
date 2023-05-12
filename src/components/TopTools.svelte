@@ -12,7 +12,13 @@
 
 <div class="tools">
   <div class="tool-row">
-    <div class="btn">{$selectedChar}</div>
+    <div class="char-view">{$selectedChar}</div>
+    <button class="btn" on:click={() => selectedChar.set(" ")}> </button>
+    <button class="btn" on:click={() => selectedChar.set("░")}>░</button>
+    <button class="btn" on:click={() => selectedChar.set("▒")}>▒</button>
+    <button class="btn" on:click={() => selectedChar.set("▓")}>▓</button>
+    <button class="btn" on:click={() => selectedChar.set("═")}>═</button>
+    <button class="btn" on:click={() => selectedChar.set("║")}>║</button>
   </div>
   {#if $iconicData.modules.length === 0}
     <div class="full">No modules to select</div>
@@ -22,7 +28,7 @@
     {@const module = $iconicData.modules[$selectedModule]}
     {#each module.parts as part}
       <button
-        class="part-row {$hoveredChar === part.char ? 'hovered' : ''}"
+        class="part-row {$hoveredChar === part.char ? 'hovered' : ''} {$selectedChar === part.char ? 'selected' : ''}"
         on:mouseenter={() => hoveredChar.set(part.char)}
         on:mouseleave={() => hoveredChar.set("")}
         on:click={() => selectedChar.set(part.char)}
@@ -43,7 +49,7 @@
           module.parts.push(arg);
           $iconicData.modules[$selectedModule].parts = module.parts;
         }}
-        nextChar={nextChar(module.parts[module.parts.length - 1].char)}
+        nextChar={module.parts.length === 0 ? "0" : nextChar(module.parts[module.parts.length - 1].char)}
       />
     {/if}
   {/if}
@@ -57,10 +63,19 @@
       display: flex;
       height: 25px;
 
+      .char-view {
+        width: 25px;
+        height: 25px;
+        overflow: hidden;
+      }
+
       .btn {
         width: 25px;
         height: 25px;
         overflow: hidden;
+        text-align: text;
+        border: none;
+        padding: 0;
       }
     }
 
@@ -77,6 +92,11 @@
 
       &.hovered {
         background-color: yellow;
+        color: black;
+      }
+
+      &.selected {
+        background-color: green;
         color: black;
       }
 
