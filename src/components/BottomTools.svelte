@@ -9,7 +9,6 @@
   import reorderIcon from "~/assets/icons/reorder.png";
   import copypartsIcon from "~/assets/icons/copyparts.png";
   import copytextIcon from "~/assets/icons/copytext.png";
-  import fileIcon from "~/assets/icons/file.png";
   import saveIcon from "~/assets/icons/save.png";
   import backIcon from "~/assets/icons/back.png";
   import FileSaver from "file-saver";
