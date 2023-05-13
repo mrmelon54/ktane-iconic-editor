@@ -57,7 +57,7 @@
 
 <style lang="scss">
   .tools {
-    width: 200px;
+    width: 100%;
 
     .tool-row {
       display: flex;

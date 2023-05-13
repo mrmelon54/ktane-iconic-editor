@@ -19,7 +19,7 @@
 
   function getCurrentModuleString(iconicData: iconicDataType, selectedModule) {
     let z = iconicData.modules[selectedModule];
-    if (z) return z.raw;
+    if (z) return capString(z.raw, 32 * 32);
     return " ".repeat(32 * 32);
   }
 
@@ -29,15 +29,15 @@
     imData = moduleCtx.getImageData(0, 0, 32, 32);
   });
 
-  selectedModule.subscribe(x => {
+  $: ((x: iconicDataType, y: number) => {
     moduleIcon.crossOrigin = "anonymous";
-    let module = get(iconicData).modules[x];
+    let module = x.modules[y];
     if (module == undefined) {
       moduleIcon.src = "about:blank";
       return;
     }
     moduleIcon.src = "https://ktane-icons.mrmelon54.com/Module Icons/" + module.key + ".png";
-  });
+  })($iconicData, $selectedModule);
 
   window.addEventListener("resize", resizeCanvas);
 
@@ -172,6 +172,10 @@
   // https://stackoverflow.com/a/1431113
   function replaceAt(s: string, index: number, replacement: string) {
     return s.substring(0, index) + replacement + s.substring(index + replacement.length);
+  }
+
+  function capString(s: string, len: number) {
+    return s.slice(0, len) + (s.length < len ? " ".repeat(len - s.length) : "");
   }
 </script>
 

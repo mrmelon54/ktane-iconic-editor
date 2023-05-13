@@ -1,17 +1,17 @@
 <script lang="ts">
-  import loadIcon from "~/assets/load.png";
-  import leftIcon from "~/assets/left.png";
-  import rightIcon from "~/assets/right.png";
-  import searchIcon from "~/assets/search.png";
-  import addIcon from "~/assets/add.png";
-  import addmultipleIcon from "~/assets/addmultiple.png";
-  import renameIcon from "~/assets/rename.png";
-  import reorderIcon from "~/assets/reorder.png";
-  import copypartsIcon from "~/assets/copyparts.png";
-  import copytextIcon from "~/assets/copytext.png";
-  import fileIcon from "~/assets/file.png";
-  import saveIcon from "~/assets/save.png";
-  import backIcon from "~/assets/back.png";
+  import loadIcon from "~/assets/icons/load.png";
+  import leftIcon from "~/assets/icons/left.png";
+  import rightIcon from "~/assets/icons/right.png";
+  import searchIcon from "~/assets/icons/search.png";
+  import addIcon from "~/assets/icons/add.png";
+  import addmultipleIcon from "~/assets/icons/addmultiple.png";
+  import renameIcon from "~/assets/icons/rename.png";
+  import reorderIcon from "~/assets/icons/reorder.png";
+  import copypartsIcon from "~/assets/icons/copyparts.png";
+  import copytextIcon from "~/assets/icons/copytext.png";
+  import fileIcon from "~/assets/icons/file.png";
+  import saveIcon from "~/assets/icons/save.png";
+  import backIcon from "~/assets/icons/back.png";
   import FileSaver from "file-saver";
   import {get} from "svelte/store";
   import {iconicData} from "~/stores/iconic-data";
@@ -63,15 +63,9 @@
   function copypartsAction() {}
 
   function copytextAction() {}
-
-  function folderAction() {}
 </script>
 
 <div class="tools">
-  <div class="tool-row">
-    <button class="btn"><img src={loadIcon} alt="Download" title="Download" /></button>
-    <div class="full">Assets gathered</div>
-  </div>
   <div class="tool-row">
     {#if $iconicData.modules.length === 0}
       <div class="full">No modules to select</div>
@@ -81,7 +75,7 @@
       {selectedModule.set(0)}
     {:else}
       <button class="btn" on:click={leftAction}><img src={leftIcon} alt="Left" title="Left" /></button>
-      <div class="full">{$iconicData.modules[$selectedModule].key}</div>
+      <div class="full module-name">{$iconicData.modules[$selectedModule].key}</div>
       <button class="btn" on:click={rightAction}><img src={rightIcon} alt="Right" title="Right" /></button>
     {/if}
   </div>
@@ -93,7 +87,6 @@
     <button class="btn"><img src={reorderIcon} alt="Reorder" title="Reorder" /></button>
     <button class="btn"><img src={copypartsIcon} alt="Copy Parts" title="Copy Parts" /></button>
     <button class="btn"><img src={copytextIcon} alt="Copy Text" title="Copy Text" /></button>
-    <button class="btn"><img src={fileIcon} alt="File" title="File" /></button>
   </div>
   <div class="tool-row">
     <button class="btn" on:click={saveAction}><img src={saveIcon} alt="Save" title="Save" /></button>
@@ -104,7 +97,7 @@
 
 <style lang="scss">
   .tools {
-    width: 200px;
+    width: 100%;
 
     .tool-row {
       display: flex;
@@ -126,6 +119,13 @@
 
       .full {
         flex-grow: 1;
+      }
+
+      .module-name {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        padding-inline: 8px;
       }
     }
   }

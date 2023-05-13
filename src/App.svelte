@@ -87,12 +87,13 @@
     #icon-view {
       display: flex;
       background: green;
-      width: 100%;
+      aspect-ratio: 1/1;
     }
 
     #right-tools {
       display: flex;
       height: 100%;
+      min-width:300px;
       justify-content: space-between;
       flex-direction: column;
 
