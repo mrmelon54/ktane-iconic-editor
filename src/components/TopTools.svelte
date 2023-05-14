@@ -1,24 +1,11 @@
 <script lang="ts">
-  import {hoveredChar, selectedChar, selectedModule} from "~/stores/editor-data";
+  import {getCurrentModuleString, getPartChar, getPartColor, hoveredChar, selectedChar, selectedModule} from "~/stores/editor-data";
   import {iconicData} from "~/stores/iconic-data";
-  import AddPartDialog from "./AddPartDialog.svelte";
-
-  let showAddPartDialog: boolean = false;
-
-  function nextChar(c) {
-    return String.fromCharCode(c.charCodeAt(0) + 1);
-  }
 </script>
 
 <div class="tools">
   <div class="tool-row">
     <div class="char-view">{$selectedChar}</div>
-    <button class="btn" on:click={() => selectedChar.set(" ")}> </button>
-    <button class="btn" on:click={() => selectedChar.set("░")}>░</button>
-    <button class="btn" on:click={() => selectedChar.set("▒")}>▒</button>
-    <button class="btn" on:click={() => selectedChar.set("▓")}>▓</button>
-    <button class="btn" on:click={() => selectedChar.set("═")}>═</button>
-    <button class="btn" on:click={() => selectedChar.set("║")}>║</button>
   </div>
   {#if $iconicData.modules.length === 0}
     <div class="full">No modules to select</div>
@@ -26,32 +13,50 @@
     <div class="full">Invalid module selected</div>
   {:else}
     {@const module = $iconicData.modules[$selectedModule]}
-    {#each module.parts as part}
+    {#each module.parts as part, i}
+      {@const partChar = getPartChar(i)}
       <button
-        class="part-row {$hoveredChar === part.char ? 'hovered' : ''} {$selectedChar === part.char ? 'selected' : ''}"
-        on:mouseenter={() => hoveredChar.set(part.char)}
+        class="part-row {$hoveredChar === partChar ? 'hovered' : ''} {$selectedChar === partChar ? 'selected' : ''}"
+        on:mouseenter={() => hoveredChar.set(partChar)}
         on:mouseleave={() => hoveredChar.set("")}
-        on:click={() => selectedChar.set(part.char)}
+        on:click={() => selectedChar.set(partChar)}
+        on:dblclick={() => {
+          let name = prompt("Enter new part name, an empty name will remove the part:", part);
+          if (name == null) return;
+          name = name.trim();
+          if (name === "") {
+            if (confirm("Do you want to remove this part?")) {
+              $iconicData.modules[$selectedModule].parts.splice(i, 1);
+              let raw = getCurrentModuleString($iconicData, $selectedModule);
+              raw = raw.replaceAll(getPartChar(i), " ");
+              for (let j = i; j < module.parts.length; j++) {
+                raw = raw.replaceAll(getPartChar(j + 1), getPartChar(j));
+              }
+              $iconicData.modules[$selectedModule].raw = raw;
+              $iconicData = $iconicData;
+            }
+            return;
+          }
+          $iconicData.modules[$selectedModule].parts[i] = name;
+          $iconicData = $iconicData;
+        }}
       >
-        <div class="part-color" style="background-color:{part.color}" />
-        <div class="part-char">{part.char}</div>
-        <div class="part-name">{part.name}</div>
+        <div class="part-color" style="background-color:{getPartColor(i)}" />
+        <div class="part-char">{partChar}</div>
+        <div class="part-name">{part}</div>
       </button>
     {/each}
-    <button class="part-row" on:click={() => (showAddPartDialog = true)}>
+    <button
+      class="part-row"
+      on:click={() => {
+        module.parts.push("Part #" + module.parts.length);
+        $iconicData.modules[$selectedModule].parts = module.parts;
+        $iconicData = $iconicData;
+      }}
+    >
       <div class="part-color" />
       <div class="part-char">+</div>
     </button>
-    {#if showAddPartDialog}
-      <AddPartDialog
-        close={() => (showAddPartDialog = false)}
-        submit={arg => {
-          module.parts.push(arg);
-          $iconicData.modules[$selectedModule].parts = module.parts;
-        }}
-        nextChar={module.parts.length === 0 ? "0" : nextChar(module.parts[module.parts.length - 1].char)}
-      />
-    {/if}
   {/if}
 </div>
 

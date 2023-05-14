@@ -1,7 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte/internal";
-  import {get} from "svelte/store";
-  import {getIconUrl, hoveredChar, selectedChar, selectedModule} from "~/stores/editor-data";
+  import {getCurrentModuleString, getIconUrl, getPartColor, hoveredChar, selectedChar, selectedModule} from "~/stores/editor-data";
   import {iconicData, type iconicDataType} from "~/stores/iconic-data";
 
   let iconWrapper: HTMLDivElement;
@@ -13,15 +12,15 @@
   let C: HTMLCanvasElement;
   $: moduleRaw = getCurrentModuleString($iconicData, $selectedModule);
 
+  let selX = -1;
+  let selY = -1;
   let mouseX = -1;
   let mouseY = -1;
   let mouseHeld = false;
+  let mouseType = "draw";
+  let mouseSel = false;
 
-  function getCurrentModuleString(iconicData: iconicDataType, selectedModule) {
-    let z = iconicData.modules[selectedModule];
-    if (z) return capString(z.raw, 32 * 32);
-    return " ".repeat(32 * 32);
-  }
+  const borderSize = 4;
 
   moduleIcon.addEventListener("load", () => {
     moduleCtx.clearRect(0, 0, 32, 32);
@@ -80,22 +79,25 @@
             ctx.textBaseline = "middle";
             ctx.fillText(r, i * s + s2 - 5 + o, j * s + s2 + o);
 
-            if (selChar == r) {
-              ctx.fillStyle = "yellow";
-              ctx.fillRect(i * s + o, j * s + o, s, 2);
-              ctx.fillRect(i * s + o, j * s + o, 2, s);
-              ctx.fillRect(i * s + o, (j + 1) * s + o - 2, s, 2);
-              ctx.fillRect((i + 1) * s + o - 2, j * s + o, 2, s);
-            }
-
-            if (i === mouseX && j === mouseY) {
-              ctx.fillStyle = "green";
-              ctx.fillRect(i * s + o, j * s + o, s, 2);
-              ctx.fillRect(i * s + o, j * s + o, 2, s);
-              ctx.fillRect(i * s + o, (j + 1) * s + o - 2, s, 2);
-              ctx.fillRect((i + 1) * s + o - 2, j * s + o, 2, s);
+            if (r !== " ") {
+              ctx.fillStyle = selChar == r ? "yellow" : getPartColor(r.charCodeAt(0) - 48);
+              if (i === 0 || r !== moduleRaw[j * 32 + (i - 1)]) borderLeft(ctx, i * s, j * s, s, s, o);
+              if (i === 31 || r !== moduleRaw[j * 32 + (i + 1)]) borderRight(ctx, i * s, j * s, s, s, o);
+              if (j === 0 || r !== moduleRaw[(j - 1) * 32 + i]) borderTop(ctx, i * s, j * s, s, s, o);
+              if (j === 31 || r !== moduleRaw[(j + 1) * 32 + i]) borderBottom(ctx, i * s, j * s, s, s, o);
             }
           }
+        }
+
+        ctx.fillStyle = "green";
+        if (mouseSel) {
+          let tl = {x: selX, y: selY};
+          let br = {x: mouseX, y: mouseY};
+          if (br.x < tl.x) [br.x, tl.x] = [tl.x, br.x];
+          if (br.y < tl.y) [br.y, tl.y] = [tl.y, br.y];
+          borderFull(ctx, tl.x * s, tl.y * s, (br.x - tl.x + 1) * s, (br.y - tl.y + 1) * s, o);
+        } else {
+          borderFull(ctx, mouseX * s, mouseY * s, s, s, o);
         }
       } else {
         for (let i = 0; i < 32; i++) {
@@ -117,37 +119,102 @@
     };
   });
 
-  function canvasClick(ev) {
-    let {x, y} = getMouseXY(ev);
-    replaceModuleRawChar({x, y});
+  function borderFull(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, o: number) {
+    borderTop(ctx, x, y, w, h, o);
+    borderLeft(ctx, x, y, w, h, o);
+    borderRight(ctx, x, y, w, h, o);
+    borderBottom(ctx, x, y, w, h, o);
+  }
+
+  function borderTop(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, _h: number, o: number) {
+    ctx.fillRect(x + o, y + o, w, borderSize);
+  }
+
+  function borderLeft(ctx: CanvasRenderingContext2D, x: number, y: number, _w: number, h: number, o: number) {
+    ctx.fillRect(x + o, y + o, borderSize, h);
+  }
+
+  function borderRight(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, o: number) {
+    ctx.fillRect(x + w + o - borderSize, y + o, borderSize, h);
+  }
+
+  function borderBottom(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, o: number) {
+    ctx.fillRect(x + o, y + h + o - borderSize, w, borderSize);
   }
 
   function canvasMouseMove(ev) {
     let {x, y} = getMouseXY(ev);
     [mouseX, mouseY] = [x, y];
-    if (mouseHeld) replaceModuleRawChar({x, y});
+    if (mouseHeld && !mouseSel) replaceModuleRawChar({x, y});
   }
 
   function canvasMouseDown(ev) {
     let {x, y} = getMouseXY(ev);
+    switch (ev.button) {
+      case 0:
+        mouseType = "draw";
+        break;
+      case 1:
+        $selectedChar = moduleRaw[y * 32 + x];
+        return;
+      case 2:
+        mouseType = "erase";
+        break;
+      default:
+        return;
+    }
     [mouseX, mouseY] = [x, y];
     mouseHeld = true;
-    replaceModuleRawChar({x, y});
+    if (ev.ctrlKey) {
+      mouseSel = true;
+      [selX, selY] = [x, y];
+    } else {
+      replaceModuleRawChar({x, y});
+    }
   }
 
   function canvasMouseUp() {
     mouseHeld = false;
+    if (mouseSel) {
+      replaceModuleRawChars({x: selX, y: selY}, {x: mouseX, y: mouseY});
+      mouseSel = false;
+      [selX, selY] = [-1, -1];
+    }
   }
 
   function canvasMouseLeave() {
     mouseHeld = false;
-    mouseX = -1;
-    mouseY = -1;
+    [mouseX, mouseY] = [-1, -1];
+    mouseSel = false;
+    [selX, selY] = [-1, -1];
+  }
+
+  function canvasKeyChange(ev) {
+    if (ev.ctrlKey) {
+      mouseSel = true;
+      [selX, selY] = [mouseX, mouseY];
+    }
   }
 
   function replaceModuleRawChar({x, y}) {
     if (x < 0 || y < 0 || x >= 32 || y >= 32) return;
-    moduleRaw = replaceAt(moduleRaw, y * 32 + x, $selectedChar);
+    moduleRaw = replaceAt(moduleRaw, y * 32 + x, mouseType === "draw" ? $selectedChar : " ");
+    iconicData.update(z => {
+      z.modules[$selectedModule].raw = moduleRaw;
+      return z;
+    });
+  }
+
+  function replaceModuleRawChars(tl: {x: number; y: number}, br: {x: number; y: number}) {
+    if (tl.x < 0 || tl.y < 0 || br.x >= 32 || br.y >= 32) return;
+    if (br.x < tl.x) [br.x, tl.x] = [tl.x, br.x];
+    if (br.y < tl.y) [br.y, tl.y] = [tl.y, br.y];
+    let char = mouseType === "draw" ? $selectedChar : " ";
+
+    let dx = br.x - tl.x;
+    for (let y = tl.y; y < br.y + 1; y++) {
+      moduleRaw = replaceAt(moduleRaw, y * 32 + tl.x, char.repeat(dx + 1));
+    }
     iconicData.update(z => {
       z.modules[$selectedModule].raw = moduleRaw;
       return z;
@@ -163,19 +230,15 @@
   }
 
   // Used algorithm from: https://stackoverflow.com/a/11868159
-  function colorContrast(r, g, b) {
+  function colorContrast(r: number, g: number, b: number): "black" | "white" {
     // http://www.w3.org/TR/AERT#color-contrast
     const brightness = Math.round((parseInt(r) * 299 + parseInt(g) * 587 + parseInt(b) * 114) / 1000);
     return brightness > 125 ? "black" : "white";
   }
 
   // https://stackoverflow.com/a/1431113
-  function replaceAt(s: string, index: number, replacement: string) {
+  function replaceAt(s: string, index: number, replacement: string): string {
     return s.substring(0, index) + replacement + s.substring(index + replacement.length);
-  }
-
-  function capString(s: string, len: number) {
-    return s.slice(0, len) + (s.length < len ? " ".repeat(len - s.length) : "");
   }
 </script>
 
@@ -184,11 +247,13 @@
     <canvas
       bind:this={C}
       id="icon"
-      on:click={canvasClick}
       on:mousemove={canvasMouseMove}
       on:mousedown={canvasMouseDown}
       on:mouseup={canvasMouseUp}
       on:mouseleave={canvasMouseLeave}
+      on:contextmenu={ev => ev.preventDefault()}
+      on:keydown={canvasKeyChange}
+      on:keyup={canvasKeyChange}
     />
     <canvas bind:this={moduleCanvas} id="module-icon-hidden" />
   </div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {onMount} from "svelte";
   import {getIconUrl} from "~/stores/editor-data";
   import {iconicData} from "~/stores/iconic-data";
 
@@ -70,6 +71,12 @@
       return x;
     });
   }
+
+  let inputTextarea: HTMLTextAreaElement;
+
+  onMount(() => {
+    inputTextarea.focus();
+  });
 </script>
 
 <div class="dialog-outer">
@@ -80,7 +87,7 @@
     </div>
     <div class="dialog-content">
       <div>
-        <textarea class="add-textbox" bind:value={inputValue} />
+        <textarea class="add-textbox" bind:value={inputValue} bind:this={inputTextarea} />
       </div>
       {#if verifying}
         <div>Verifying input</div>
