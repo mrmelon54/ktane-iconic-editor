@@ -1,10 +1,8 @@
 <script lang="ts">
-  import loadIcon from "~/assets/icons/load.png";
   import leftIcon from "~/assets/icons/left.png";
   import rightIcon from "~/assets/icons/right.png";
   import searchIcon from "~/assets/icons/search.png";
   import addIcon from "~/assets/icons/add.png";
-  import addmultipleIcon from "~/assets/icons/addmultiple.png";
   import renameIcon from "~/assets/icons/rename.png";
   import reorderIcon from "~/assets/icons/reorder.png";
   import copypartsIcon from "~/assets/icons/copyparts.png";
@@ -15,6 +13,9 @@
   import {get} from "svelte/store";
   import {iconicData} from "~/stores/iconic-data";
   import {selectedModule} from "~/stores/editor-data";
+  import AddDialog from "./AddDialog.svelte";
+
+  let showAddDialog: boolean = false;
 
   function saveAction() {
     // JavaScript is still difficult in 2023
@@ -35,18 +36,6 @@
   }
 
   function searchAction() {}
-
-  function addAction() {
-    let key = prompt("Module Key:");
-    iconicData.update(x => {
-      x.modules.push({
-        key,
-        raw: " ".repeat(32 * 32),
-        parts: [],
-      });
-      return x;
-    });
-  }
 
   function renameAction() {
     let key = prompt("Module Key (press escape to cancel):");
@@ -80,8 +69,7 @@
   </div>
   <div class="tool-row">
     <button class="btn"><img src={searchIcon} alt="Search" title="Search" /></button>
-    <button class="btn" on:click={addAction}><img src={addIcon} alt="Add" title="Add" /></button>
-    <button class="btn"><img src={addmultipleIcon} alt="Add Multiple" title="Add Multiple" /></button>
+    <button class="btn" on:click={() => (showAddDialog = true)}><img src={addIcon} alt="Add" title="Add" /></button>
     <button class="btn" on:click={renameAction}><img src={renameIcon} alt="Rename" title="Rename" /></button>
     <button class="btn"><img src={reorderIcon} alt="Reorder" title="Reorder" /></button>
     <button class="btn"><img src={copypartsIcon} alt="Copy Parts" title="Copy Parts" /></button>
@@ -92,6 +80,9 @@
     <div class="full">1 unsaved</div>
     <button class="btn"><img src={backIcon} alt="Back" title="Back" /></button>
   </div>
+  {#if showAddDialog}
+    <AddDialog close={() => (showAddDialog = false)} />
+  {/if}
 </div>
 
 <style lang="scss">

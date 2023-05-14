@@ -10,7 +10,7 @@
   let nameValue: string = "";
 </script>
 
-<div id="add-part-dialog">
+<div class="dialog-outer">
   <div class="dialog">
     <div class="dialog-header">
       <h2>Add Part</h2>
@@ -42,32 +42,5 @@
 </div>
 
 <style lang="scss">
-  #add-part-dialog {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-
-    > .dialog {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      width: 300px;
-      height: 300px;
-      transform: translate(-50%, -50%);
-      background-color: #242424;
-      padding: 16px;
-
-      > .dialog-header {
-        display: flex;
-        justify-content: space-between;
-
-        > h2 {
-          margin: 0;
-        }
-      }
-    }
-  }
+  @import "../assets/dialog.scss";
 </style>

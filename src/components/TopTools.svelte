@@ -3,7 +3,7 @@
   import {iconicData} from "~/stores/iconic-data";
   import AddPartDialog from "./AddPartDialog.svelte";
 
-  let showDialog: boolean = false;
+  let showAddPartDialog: boolean = false;
 
   function nextChar(c) {
     return String.fromCharCode(c.charCodeAt(0) + 1);
@@ -38,13 +38,13 @@
         <div class="part-name">{part.name}</div>
       </button>
     {/each}
-    <button class="part-row" on:click={() => (showDialog = true)}>
+    <button class="part-row" on:click={() => (showAddPartDialog = true)}>
       <div class="part-color" />
       <div class="part-char">+</div>
     </button>
-    {#if showDialog}
+    {#if showAddPartDialog}
       <AddPartDialog
-        close={() => (showDialog = false)}
+        close={() => (showAddPartDialog = false)}
         submit={arg => {
           module.parts.push(arg);
           $iconicData.modules[$selectedModule].parts = module.parts;

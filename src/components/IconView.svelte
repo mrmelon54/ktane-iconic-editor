@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte/internal";
   import {get} from "svelte/store";
-  import {hoveredChar, selectedChar, selectedModule} from "~/stores/editor-data";
+  import {getIconUrl, hoveredChar, selectedChar, selectedModule} from "~/stores/editor-data";
   import {iconicData, type iconicDataType} from "~/stores/iconic-data";
 
   let iconWrapper: HTMLDivElement;
@@ -36,7 +36,7 @@
       moduleIcon.src = "about:blank";
       return;
     }
-    moduleIcon.src = "https://ktane-icons.mrmelon54.com/Module Icons/" + module.key + ".png";
+    moduleIcon.src = getIconUrl(module.key);
   })($iconicData, $selectedModule);
 
   window.addEventListener("resize", resizeCanvas);

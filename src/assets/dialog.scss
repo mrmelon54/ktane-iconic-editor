@@ -1,0 +1,28 @@
+.dialog-outer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+
+  >.dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 300px;
+    min-height: 300px;
+    transform: translate(-50%, -50%);
+    background-color: #242424;
+    padding: 16px;
+
+    >.dialog-header {
+      display: flex;
+      justify-content: space-between;
+
+      >h2 {
+        margin: 0;
+      }
+    }
+  }
+}
