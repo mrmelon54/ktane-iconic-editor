@@ -86,7 +86,6 @@
 
     #icon-view {
       display: flex;
-      background: #343434;
       aspect-ratio: 1/1;
     }
 
