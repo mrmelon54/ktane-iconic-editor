@@ -32,7 +32,7 @@
     moduleIcon.crossOrigin = "anonymous";
     let module = x.modules[y];
     if (module == undefined) {
-      moduleIcon.src = "about:blank";
+      moduleIcon.src = getIconUrl("../Extra Icons/Misc/blank");
       return;
     }
     moduleIcon.src = getIconUrl(module.key);
@@ -97,7 +97,7 @@
           if (br.y < tl.y) [br.y, tl.y] = [tl.y, br.y];
           borderFull(ctx, tl.x * s, tl.y * s, (br.x - tl.x + 1) * s, (br.y - tl.y + 1) * s, o);
         } else {
-          borderFull(ctx, mouseX * s, mouseY * s, s, s, o);
+          if (mouseX >= 0 && mouseY >= 0 && mouseX < 32 && mouseY < 32) borderFull(ctx, mouseX * s, mouseY * s, s, s, o);
         }
       } else {
         for (let i = 0; i < 32; i++) {
@@ -108,10 +108,6 @@
           }
         }
       }
-
-      ctx.fillStyle = "lightcoral";
-      ctx.fillRect(s * 32 + o, 0, C.clientWidth, C.clientHeight);
-      ctx.fillRect(0, s * 32 + o, C.clientWidth, C.clientHeight);
     }
 
     return () => {
@@ -200,7 +196,7 @@
     if (x < 0 || y < 0 || x >= 32 || y >= 32) return;
     moduleRaw = replaceAt(moduleRaw, y * 32 + x, mouseType === "draw" ? $selectedChar : " ");
     iconicData.update(z => {
-      z.modules[$selectedModule].raw = moduleRaw;
+      if (z.modules[$selectedModule]) z.modules[$selectedModule].raw = moduleRaw;
       return z;
     });
   }
@@ -216,7 +212,7 @@
       moduleRaw = replaceAt(moduleRaw, y * 32 + tl.x, char.repeat(dx + 1));
     }
     iconicData.update(z => {
-      z.modules[$selectedModule].raw = moduleRaw;
+      if (z.modules[$selectedModule]) z.modules[$selectedModule].raw = moduleRaw;
       return z;
     });
   }
@@ -272,7 +268,6 @@
 
       #icon {
         aspect-ratio: 1/1;
-        background: lightcoral;
         image-rendering: pixelated;
       }
 

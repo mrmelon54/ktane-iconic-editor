@@ -4,14 +4,14 @@
 </script>
 
 <div class="tools">
-  <div class="tool-row">
-    <div class="char-view">{$selectedChar}</div>
-  </div>
   {#if $iconicData.modules.length === 0}
     <div class="full">No modules to select</div>
   {:else if $selectedModule < 0 || $selectedModule >= $iconicData.modules.length}
     <div class="full">Invalid module selected</div>
   {:else}
+    <div class="tool-row">
+      <div class="char-view">{$selectedChar}</div>
+    </div>
     {@const module = $iconicData.modules[$selectedModule]}
     {#each module.parts as part, i}
       {@const partChar = getPartChar(i)}
@@ -72,15 +72,6 @@
         width: 25px;
         height: 25px;
         overflow: hidden;
-      }
-
-      .btn {
-        width: 25px;
-        height: 25px;
-        overflow: hidden;
-        text-align: text;
-        border: none;
-        padding: 0;
       }
     }
 

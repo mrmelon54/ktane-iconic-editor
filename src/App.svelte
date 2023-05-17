@@ -86,7 +86,7 @@
 
     #icon-view {
       display: flex;
-      background: green;
+      background: #343434;
       aspect-ratio: 1/1;
     }
 
@@ -96,14 +96,6 @@
       min-width:300px;
       justify-content: space-between;
       flex-direction: column;
-
-      #top-tools {
-        background: blue;
-      }
-
-      #bottom-tools {
-        background: red;
-      }
     }
 
     #dragDropOverlay {
