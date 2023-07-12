@@ -1,6 +1,35 @@
 <script lang="ts">
   import {getCurrentModuleString, getPartChar, getPartColor, hoveredChar, selectedChar, selectedModule} from "~/stores/editor-data";
   import {iconicData} from "~/stores/iconic-data";
+
+  let renameMode: {part: string; i: number} | null = null;
+  let renameInput: HTMLInputElement;
+
+  $: if (renameInput) renameInput.focus();
+
+  function renamePart(value: string, part: string, i: number) {
+    const module = $iconicData.modules[$selectedModule];
+    value = value.trim();
+    if (value === "") {
+      if (confirm("Do you want to remove this part?")) {
+        $iconicData.modules[$selectedModule].parts.splice(i, 1);
+        let raw = getCurrentModuleString($iconicData, $selectedModule);
+        raw = raw.replaceAll(getPartChar(i), " ");
+        for (let j = i; j < module.parts.length; j++) {
+          raw = raw.replaceAll(getPartChar(j + 1), getPartChar(j));
+        }
+        $iconicData.modules[$selectedModule].raw = raw;
+        $iconicData = $iconicData;
+      }
+      return;
+    }
+    $iconicData.modules[$selectedModule].parts[i] = value;
+    $iconicData = $iconicData;
+  }
+
+  function renamePartKeyPress(e) {
+    if (renameMode && e.charCode === 13) renamePart(renameInput.value, renameMode.part, renameMode.i);
+  }
 </script>
 
 <div class="tools">
@@ -20,30 +49,17 @@
         on:mouseenter={() => hoveredChar.set(partChar)}
         on:mouseleave={() => hoveredChar.set("")}
         on:click={() => selectedChar.set(partChar)}
-        on:dblclick={() => {
-          let name = prompt("Enter new part name, an empty name will remove the part:", part);
-          if (name == null) return;
-          name = name.trim();
-          if (name === "") {
-            if (confirm("Do you want to remove this part?")) {
-              $iconicData.modules[$selectedModule].parts.splice(i, 1);
-              let raw = getCurrentModuleString($iconicData, $selectedModule);
-              raw = raw.replaceAll(getPartChar(i), " ");
-              for (let j = i; j < module.parts.length; j++) {
-                raw = raw.replaceAll(getPartChar(j + 1), getPartChar(j));
-              }
-              $iconicData.modules[$selectedModule].raw = raw;
-              $iconicData = $iconicData;
-            }
-            return;
-          }
-          $iconicData.modules[$selectedModule].parts[i] = name;
-          $iconicData = $iconicData;
-        }}
+        on:dblclick={() => (renameMode = {part, i})}
       >
         <div class="part-color" style="background-color:{getPartColor(i)}" />
         <div class="part-char">{partChar}</div>
-        <div class="part-name">{part}</div>
+        {#if renameMode && renameMode.part === part && renameMode.i === i}
+          <div class="part-rename">
+            <input type="text" value={part} bind:this={renameInput} on:blur={() => (renameMode = null)} on:keypress={e => renamePartKeyPress(e)} />
+          </div>
+        {:else}
+          <div class="part-name">{part}</div>
+        {/if}
       </button>
     {/each}
     <button
