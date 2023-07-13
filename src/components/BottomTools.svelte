@@ -10,47 +10,43 @@
   import saveIcon from "~/assets/icons/save.png";
   import backIcon from "~/assets/icons/back.png";
   import FileSaver from "file-saver";
-  import {get} from "svelte/store";
   import {iconicData} from "~/stores/iconic-data";
   import {selectedModule} from "~/stores/editor-data";
   import AddDialog from "./AddDialog.svelte";
+  import CopyDialog from "./CopyDialog.svelte";
 
+  let showSearchDialog: boolean = false;
   let showAddDialog: boolean = false;
+  let showReorderDialog: boolean = false;
+  let showCopyPartsDialog: boolean = false;
+  let showCopyTextDialog: boolean = false;
 
   function saveAction() {
     // JavaScript is still difficult in 2023
-    var blob = new Blob([JSON.stringify(get(iconicData), null, 4)], {type: "text/plain;charset=utf-8"});
+    var blob = new Blob([JSON.stringify($iconicData, null, 4)], {type: "text/plain;charset=utf-8"});
     FileSaver.saveAs(blob, "iconicData.json");
   }
 
   function leftAction() {
-    let x = get(selectedModule) - 1;
-    if (x < 0) selectedModule.set(get(iconicData).modules.length - 1);
+    let x = $selectedModule - 1;
+    if (x < 0) selectedModule.set($iconicData.modules.length - 1);
     else selectedModule.set(x);
   }
 
   function rightAction() {
-    let x = get(selectedModule) + 1;
-    if (x >= get(iconicData).modules.length) selectedModule.set(0);
+    let x = $selectedModule + 1;
+    if (x >= $iconicData.modules.length) selectedModule.set(0);
     else selectedModule.set(x);
   }
-
-  function searchAction() {}
 
   function renameAction() {
     let key = prompt("Module Key (press escape to cancel):");
     if (key == null) return;
     iconicData.update(x => {
-      x.modules[get(selectedModule)].key = key;
+      x.modules[$selectedModule].key = key;
       return x;
     });
   }
-
-  function reorderAction() {}
-
-  function copypartsAction() {}
-
-  function copytextAction() {}
 </script>
 
 <div class="tools">
@@ -68,12 +64,12 @@
     {/if}
   </div>
   <div class="tool-row">
-    <button class="btn"><img src={searchIcon} alt="Search" title="Search" /></button>
+    <button class="btn" on:click={() => (showSearchDialog = true)}><img src={searchIcon} alt="Search" title="Search" /></button>
     <button class="btn" on:click={() => (showAddDialog = true)}><img src={addIcon} alt="Add" title="Add" /></button>
     <button class="btn" on:click={renameAction}><img src={renameIcon} alt="Rename" title="Rename" /></button>
-    <button class="btn"><img src={reorderIcon} alt="Reorder" title="Reorder" /></button>
-    <button class="btn"><img src={copypartsIcon} alt="Copy Parts" title="Copy Parts" /></button>
-    <button class="btn"><img src={copytextIcon} alt="Copy Text" title="Copy Text" /></button>
+    <button class="btn" on:click={() => (showReorderDialog = true)}><img src={reorderIcon} alt="Reorder" title="Reorder" /></button>
+    <button class="btn" on:click={() => (showCopyPartsDialog = true)}><img src={copypartsIcon} alt="Copy Parts" title="Copy Parts" /></button>
+    <button class="btn" on:click={() => (showCopyTextDialog = true)}><img src={copytextIcon} alt="Copy Text" title="Copy Text" /></button>
   </div>
   <div class="tool-row">
     <button class="btn" on:click={saveAction}><img src={saveIcon} alt="Save" title="Save" /></button>
@@ -82,6 +78,12 @@
   </div>
   {#if showAddDialog}
     <AddDialog close={() => (showAddDialog = false)} />
+  {/if}
+  {#if showCopyPartsDialog}
+    <CopyDialog type="parts" close={() => (showCopyPartsDialog = false)} />
+  {/if}
+  {#if showCopyTextDialog}
+    <CopyDialog type="text" close={() => (showCopyTextDialog = false)} />
   {/if}
 </div>
 
