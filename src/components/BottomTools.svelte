@@ -14,6 +14,7 @@
   import {selectedModule} from "~/stores/editor-data";
   import AddDialog from "./AddDialog.svelte";
   import CopyDialog from "./CopyDialog.svelte";
+  import ReorderDialog from "./ReorderDialog.svelte";
 
   let showSearchDialog: boolean = false;
   let showAddDialog: boolean = false;
@@ -78,6 +79,9 @@
   </div>
   {#if showAddDialog}
     <AddDialog close={() => (showAddDialog = false)} />
+  {/if}
+  {#if showReorderDialog}
+    <ReorderDialog close={() => (showReorderDialog = false)} />
   {/if}
   {#if showCopyPartsDialog}
     <CopyDialog type="parts" close={() => (showCopyPartsDialog = false)} />

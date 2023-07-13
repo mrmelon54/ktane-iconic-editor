@@ -24,22 +24,26 @@
   let fileinput;
 
   function dragEnter(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    dropArea.classList.add("highlight");
+    if (e.dataTransfer.items[0].kind === "file") {
+      e.preventDefault();
+      e.stopPropagation();
+      dropArea.classList.add("highlight");
+    }
   }
 
   function dragLeave(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    dropArea.classList.remove("highlight");
+    if (e.dataTransfer.items[0].kind === "file") {
+      e.preventDefault();
+      e.stopPropagation();
+      dropArea.classList.remove("highlight");
+    }
   }
 
   function handleDrop(e) {
-    dragLeave(e);
-    let dt = e.dataTransfer;
-    let files = dt.files;
-    onFileSelected(files);
+    if (e.dataTransfer.items[0].kind === "file") {
+      dragLeave(e);
+      onFileSelected(e.dataTransfer.files);
+    }
   }
 
   onMount(() => {
@@ -92,7 +96,7 @@
     #right-tools {
       display: flex;
       height: 100%;
-      min-width:300px;
+      min-width: 300px;
       justify-content: space-between;
       flex-direction: column;
     }
