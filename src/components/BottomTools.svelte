@@ -15,6 +15,7 @@
   import AddDialog from "./AddDialog.svelte";
   import CopyDialog from "./CopyDialog.svelte";
   import ReorderDialog from "./ReorderDialog.svelte";
+  import SearchDialog from "./SearchDialog.svelte";
 
   let showSearchDialog: boolean = false;
   let showAddDialog: boolean = false;
@@ -30,14 +31,14 @@
 
   function leftAction() {
     let x = $selectedModule - 1;
-    if (x < 0) selectedModule.set($iconicData.modules.length - 1);
-    else selectedModule.set(x);
+    if (x < 0) $selectedModule = $iconicData.modules.length - 1;
+    else $selectedModule = x;
   }
 
   function rightAction() {
     let x = $selectedModule + 1;
-    if (x >= $iconicData.modules.length) selectedModule.set(0);
-    else selectedModule.set(x);
+    if (x >= $iconicData.modules.length) $selectedModule = 0;
+    else $selectedModule = x;
   }
 
   function renameAction() {
@@ -55,7 +56,7 @@
     {#if $iconicData.modules.length === 0}
       <div class="full">No modules to select</div>
     {:else if $selectedModule < 0 || $selectedModule >= $iconicData.modules.length}
-      <button class="btn" on:click={() => selectedModule.set(0)}><img src={leftIcon} alt="Left" title="Left" /></button>
+      <button class="btn" on:click={() => ($selectedModule = 0)}><img src={leftIcon} alt="Left" title="Left" /></button>
       <div class="full">Invalid module selected</div>
       {selectedModule.set(0)}
     {:else}
@@ -77,6 +78,9 @@
     <div class="full">1 unsaved</div>
     <button class="btn"><img src={backIcon} alt="Back" title="Back" /></button>
   </div>
+  {#if showSearchDialog}
+    <SearchDialog close={() => (showSearchDialog = false)} />
+  {/if}
   {#if showAddDialog}
     <AddDialog close={() => (showAddDialog = false)} />
   {/if}
