@@ -11,7 +11,7 @@
   function changeModule() {
     let v = inputValue;
     let i = $iconicData.modules.findIndex(x => x.key == v);
-    $selectedModule = i;
+    if (i != -1) $selectedModule = i;
   }
 
   function keyPress(e) {
