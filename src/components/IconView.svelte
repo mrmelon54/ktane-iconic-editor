@@ -217,11 +217,16 @@
     });
   }
 
-  function getMouseXY({layerX, layerY}) {
+  function getMouseXY({target, clientX, clientY}) {
     let s = Math.floor(C.clientWidth / 32);
+    let oTop = moduleCanvas.offsetTop;
+    let oLeft = moduleCanvas.offsetLeft;
+    const bbox = target.getBoundingClientRect();
+    const layerX = clientX - bbox.left;
+    const layerY = clientY - bbox.top;
     let o = Math.floor((C.clientWidth - s * 32) / 2);
-    let x = Math.floor((layerX - o) / s);
-    let y = Math.floor((layerY - o) / s);
+    let x = Math.floor((layerX - oTop - o) / s);
+    let y = Math.floor((layerY - oLeft - o) / s);
     return {x, y};
   }
 
