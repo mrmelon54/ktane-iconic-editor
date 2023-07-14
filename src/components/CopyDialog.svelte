@@ -1,23 +1,15 @@
 <script lang="ts">
-  import {onMount} from "svelte";
   import {selectedModule} from "~/stores/editor-data";
   import {iconicData} from "~/stores/iconic-data";
 
-  export let type: string = "";
   export let close: () => void;
 
   function dblClickModule(i: number) {
-    if (type === "parts") {
-      iconicData.update(x => {
-        x.modules[i].parts = x.modules[$selectedModule].parts;
-        return x;
-      });
-    } else {
-      iconicData.update(x => {
-        x.modules[i].raw = x.modules[$selectedModule].raw;
-        return x;
-      });
-    }
+    iconicData.update(x => {
+      x.modules[i].parts = x.modules[$selectedModule].parts;
+      x.modules[i].raw = x.modules[$selectedModule].raw;
+      return x;
+    });
     $selectedModule = i;
     close();
   }
@@ -26,11 +18,11 @@
 <div class="dialog-outer">
   <div class="dialog">
     <div class="dialog-header">
-      <h2>Copy Module {type === "parts" ? "Parts" : "Text"}</h2>
+      <h2>Copy Module Parts and Text</h2>
       <button class="cancel-button" on:click={() => close()}>&times;</button>
     </div>
     <div class="dialog-content">
-      <p>Double click on a module below to copy the {type} to it</p>
+      <p>Double click on a module below to copy the parts and text to it</p>
       {#each $iconicData.modules as module, i}
         <div class="module-key" on:dblclick={() => dblClickModule(i)}>{module.key}</div>
       {/each}

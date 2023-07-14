@@ -5,8 +5,7 @@
   import addIcon from "~/assets/icons/add.png";
   import renameIcon from "~/assets/icons/rename.png";
   import reorderIcon from "~/assets/icons/reorder.png";
-  import copypartsIcon from "~/assets/icons/copyparts.png";
-  import copytextIcon from "~/assets/icons/copytext.png";
+  import copyIcon from "~/assets/icons/copyparts.png";
   import saveIcon from "~/assets/icons/save.png";
   import backIcon from "~/assets/icons/back.png";
   import FileSaver from "file-saver";
@@ -20,7 +19,7 @@
   let showSearchDialog: boolean = false;
   let showAddDialog: boolean = false;
   let showReorderDialog: boolean = false;
-  let showCopyPartsDialog: boolean = false;
+  let showCopyDialog: boolean = false;
   let showCopyTextDialog: boolean = false;
 
   function saveAction() {
@@ -70,8 +69,7 @@
     <button class="btn" on:click={() => (showAddDialog = true)}><img src={addIcon} alt="Add" title="Add" /></button>
     <button class="btn" on:click={renameAction}><img src={renameIcon} alt="Rename" title="Rename" /></button>
     <button class="btn" on:click={() => (showReorderDialog = true)}><img src={reorderIcon} alt="Reorder" title="Reorder" /></button>
-    <button class="btn" on:click={() => (showCopyPartsDialog = true)}><img src={copypartsIcon} alt="Copy Parts" title="Copy Parts" /></button>
-    <button class="btn" on:click={() => (showCopyTextDialog = true)}><img src={copytextIcon} alt="Copy Text" title="Copy Text" /></button>
+    <button class="btn" on:click={() => (showCopyDialog = true)}><img src={copyIcon} alt="Copy Parts and Text" title="Copy Parts and Text" /></button>
   </div>
   <div class="tool-row">
     <button class="btn" on:click={saveAction}><img src={saveIcon} alt="Save" title="Save" /></button>
@@ -87,11 +85,8 @@
   {#if showReorderDialog}
     <ReorderDialog close={() => (showReorderDialog = false)} />
   {/if}
-  {#if showCopyPartsDialog}
-    <CopyDialog type="parts" close={() => (showCopyPartsDialog = false)} />
-  {/if}
-  {#if showCopyTextDialog}
-    <CopyDialog type="text" close={() => (showCopyTextDialog = false)} />
+  {#if showCopyDialog}
+    <CopyDialog close={() => (showCopyDialog = false)} />
   {/if}
 </div>
 
