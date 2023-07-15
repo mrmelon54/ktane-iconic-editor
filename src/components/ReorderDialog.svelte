@@ -37,7 +37,7 @@
     </div>
     <div class="dialog-content">
       <p>Drag modules to reorder</p>
-      <div use:dndzone={{items: items}} on:consider={handleConsider} on:finalize={handleFinalize}>
+      <div id="dnd" use:dndzone={{items: items}} on:consider={handleConsider} on:finalize={handleFinalize}>
         {#each items as item (item.id)}
           <div class="module-key">{item.key}</div>
         {/each}
@@ -57,5 +57,10 @@
       background-color: aqua;
       color: black;
     }
+  }
+
+  #dnd {
+    overflow-y: auto;
+    max-height: calc(80vh - 100px);
   }
 </style>

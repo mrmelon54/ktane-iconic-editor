@@ -9,7 +9,7 @@
   import saveIcon from "~/assets/icons/save.png";
   import backIcon from "~/assets/icons/back.png";
   import FileSaver from "file-saver";
-  import {iconicData} from "~/stores/iconic-data";
+  import {exportIconicData, iconicData} from "~/stores/iconic-data";
   import {selectedModule} from "~/stores/editor-data";
   import AddDialog from "./AddDialog.svelte";
   import CopyDialog from "./CopyDialog.svelte";
@@ -24,7 +24,7 @@
 
   function saveAction() {
     // JavaScript is still difficult in 2023
-    var blob = new Blob([JSON.stringify($iconicData, null, 4)], {type: "text/plain;charset=utf-8"});
+    var blob = new Blob([exportIconicData($iconicData)], {type: "text/plain;charset=utf-8"});
     FileSaver.saveAs(blob, "iconicData.json");
   }
 

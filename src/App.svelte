@@ -4,6 +4,7 @@
   import IconView from "./components/IconView.svelte";
   import TopTools from "./components/TopTools.svelte";
   import {iconicData, isIconicDataType} from "./stores/iconic-data";
+  import {updateOnLoad} from "./stores/editor-data";
 
   function onFileSelected(files) {
     let image = files[0];
@@ -14,6 +15,7 @@
         let j = JSON.parse(e.target.result as string);
         if (!isIconicDataType(j)) throw new Error("JSON file follows wrong format");
         iconicData.set(j);
+        $updateOnLoad = !$updateOnLoad;
       } catch (e) {
         alert("Failed to parse JSON file: " + e);
       }

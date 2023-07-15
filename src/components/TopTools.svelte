@@ -1,13 +1,22 @@
 <script lang="ts">
-  import {getCurrentModuleString, getPartChar, getPartColor, hoveredChar, selectedChar, selectedModule} from "~/stores/editor-data";
-  import {iconicData} from "~/stores/iconic-data";
+  import {
+    getCurrentModuleString,
+    getNextPartCharSafe,
+    getPartChar,
+    getPartColor,
+    hoveredChar,
+    selectedChar,
+    selectedModule,
+  } from "~/stores/editor-data";
+  import {iconicData, type iconicDataPart} from "~/stores/iconic-data";
+  import DynamicPartColor from "./DynamicPartColor.svelte";
 
-  let renameMode: {part: string; i: number} | null = null;
+  let renameMode: {part: iconicDataPart; i: number} | null = null;
   let renameInput: HTMLInputElement;
 
   $: if (renameInput) renameInput.focus();
 
-  function renamePart(value: string, part: string, i: number) {
+  function renamePart(value: string, part: iconicDataPart, i: number) {
     const module = $iconicData.modules[$selectedModule];
     value = value.trim();
     if (value === "") {
@@ -23,12 +32,16 @@
       }
       return;
     }
-    $iconicData.modules[$selectedModule].parts[i] = value;
+    $iconicData.modules[$selectedModule].parts[i] = {char: module.parts[i].char, name: value, color: module.parts[i].color};
     $iconicData = $iconicData;
   }
 
   function renamePartKeyPress(e) {
-    if (renameMode && e.charCode === 13) renamePart(renameInput.value, renameMode.part, renameMode.i);
+    if (renameMode && e.which === 27) renameMode = null;
+  }
+
+  function renamePartBlur() {
+    if (renameMode) renamePart(renameInput.value, renameMode.part, renameMode.i);
   }
 </script>
 
@@ -51,21 +64,23 @@
         on:click={() => selectedChar.set(partChar)}
         on:dblclick={() => (renameMode = {part, i})}
       >
-        <div class="part-color" style="background-color:{getPartColor(i)}" />
+        <div class="part-color">
+          <DynamicPartColor moduleIndex={$selectedModule} partIndex={i} />
+        </div>
         <div class="part-char">{partChar}</div>
         {#if renameMode && renameMode.part === part && renameMode.i === i}
           <div class="part-rename">
-            <input type="text" value={part} bind:this={renameInput} on:blur={() => (renameMode = null)} on:keypress={e => renamePartKeyPress(e)} />
+            <input type="text" value={part.name} bind:this={renameInput} on:blur={() => renamePartBlur()} on:keydown={e => renamePartKeyPress(e)} />
           </div>
         {:else}
-          <div class="part-name">{part}</div>
+          <div class="part-name">{part.name}</div>
         {/if}
       </button>
     {/each}
     <button
       class="part-row"
       on:click={() => {
-        module.parts.push("Part #" + module.parts.length);
+        module.parts.push({char: getNextPartCharSafe(module.parts), name: "Part #" + module.parts.length, color: ""});
         $iconicData.modules[$selectedModule].parts = module.parts;
         $iconicData = $iconicData;
       }}
@@ -101,6 +116,7 @@
       text-align: left;
       width: inherit;
       font-size: inherit;
+      color: rgba(255, 255, 255, 0.87);
 
       &.hovered {
         background-color: yellow;
@@ -113,7 +129,7 @@
       }
 
       .part-color {
-        width: 5px;
+        width: 20px;
         height: 20px;
       }
 

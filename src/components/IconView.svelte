@@ -1,7 +1,17 @@
 <script lang="ts">
   import {onMount} from "svelte/internal";
-  import {getCurrentModuleString, getIconUrl, getPartColor, hoveredChar, selectedChar, selectedModule} from "~/stores/editor-data";
-  import {iconicData, type iconicDataType} from "~/stores/iconic-data";
+  import {
+    getCurrentModuleString,
+    getIconUrl,
+    getNextPartCharSafe,
+    getPartChar,
+    getPartColor,
+    getPartColorByChar,
+    hoveredChar,
+    selectedChar,
+    selectedModule,
+  } from "~/stores/editor-data";
+  import {iconicData, type iconicDataPart, type iconicDataType} from "~/stores/iconic-data";
 
   let iconWrapper: HTMLDivElement;
   let moduleIcon: HTMLImageElement = new Image(32, 32);
@@ -11,6 +21,8 @@
   $: imPix = (x: number, y: number, i: number) => imData.data[y * 32 * 4 + x * 4 + i];
   let C: HTMLCanvasElement;
   $: moduleRaw = getCurrentModuleString($iconicData, $selectedModule);
+
+  let parts: Map<string, iconicDataPart> = new Map();
 
   let selX = -1;
   let selY = -1;
@@ -36,6 +48,22 @@
       return;
     }
     moduleIcon.src = getIconUrl(module.key);
+
+    parts.clear();
+    let loadParts = x.modules[y].parts;
+    let updatePart: boolean = false;
+    for (let i = 0; i < loadParts.length; i++) {
+      let w = loadParts[i];
+      if (!w.char || w.char === "") {
+        w.char = getNextPartCharSafe(loadParts);
+        updatePart = true;
+      }
+      parts.set(w.char, w);
+    }
+    if (updatePart) {
+      x.modules[y].parts = loadParts;
+      $iconicData = x;
+    }
   })($iconicData, $selectedModule);
 
   window.addEventListener("resize", resizeCanvas);
@@ -80,11 +108,16 @@
             ctx.fillText(r, i * s + s2 - 5 + o, j * s + s2 + o);
 
             if (r !== " ") {
-              ctx.fillStyle = selChar == r ? "yellow" : getPartColor(r.charCodeAt(0) - 48);
-              if (i === 0 || r !== moduleRaw[j * 32 + (i - 1)]) borderLeft(ctx, i * s, j * s, s, s, o);
-              if (i === 31 || r !== moduleRaw[j * 32 + (i + 1)]) borderRight(ctx, i * s, j * s, s, s, o);
-              if (j === 0 || r !== moduleRaw[(j - 1) * 32 + i]) borderTop(ctx, i * s, j * s, s, s, o);
-              if (j === 31 || r !== moduleRaw[(j + 1) * 32 + i]) borderBottom(ctx, i * s, j * s, s, s, o);
+              if (selChar == r) {
+                ctx.fillStyle = "yellow";
+                ctx.fillRect(i * s + o, j * s + o, s, s);
+              } else {
+                ctx.fillStyle = findPartColor(r);
+                if (i === 0 || r !== moduleRaw[j * 32 + (i - 1)]) borderLeft(ctx, i * s, j * s, s, s, o);
+                if (i === 31 || r !== moduleRaw[j * 32 + (i + 1)]) borderRight(ctx, i * s, j * s, s, s, o);
+                if (j === 0 || r !== moduleRaw[(j - 1) * 32 + i]) borderTop(ctx, i * s, j * s, s, s, o);
+                if (j === 31 || r !== moduleRaw[(j + 1) * 32 + i]) borderBottom(ctx, i * s, j * s, s, s, o);
+              }
             }
           }
         }
@@ -192,6 +225,13 @@
     }
   }
 
+  function findPartColor(x: string) {
+    if (!parts.has(x)) return "#ffffff";
+    let a = parts.get(x).color;
+    if (!a || a === "") return getPartColorByChar(x);
+    return a;
+  }
+
   function replaceModuleRawChar({x, y}) {
     if (x < 0 || y < 0 || x >= 32 || y >= 32) return;
     moduleRaw = replaceAt(moduleRaw, y * 32 + x, mouseType === "draw" ? $selectedChar : " ");
@@ -233,7 +273,7 @@
   // Used algorithm from: https://stackoverflow.com/a/11868159
   function colorContrast(r: number, g: number, b: number): "black" | "white" {
     // http://www.w3.org/TR/AERT#color-contrast
-    const brightness = Math.round((parseInt(r) * 299 + parseInt(g) * 587 + parseInt(b) * 114) / 1000);
+    const brightness = Math.round((r * 299 + g * 587 + b * 114) / 1000);
     return brightness > 125 ? "black" : "white";
   }
 
