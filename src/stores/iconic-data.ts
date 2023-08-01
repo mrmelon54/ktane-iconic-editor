@@ -39,7 +39,7 @@ function isIconicDataModule(arg: any): arg is iconicDataModule {
   if (typeof arg.key != "string") throw new Error("Invalid type arg.key");
   if (!arg.raw) throw new Error("Missing arg.raw");
   if (typeof arg.raw != "string") throw new Error("Invalid type arg.raw");
-  ["░", "▒", "▓", "═", "║"].forEach(element => {
+  ["░", "▒", "▓", "█", "═", "║"].forEach(element => {
     if (arg.raw.includes(element)) throw new Error("Module string contains invalid block characters from old iconic generator");
   });
   if (!arg.parts) throw new Error("Missing arg.parts");
