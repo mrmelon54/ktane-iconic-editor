@@ -52,6 +52,9 @@
 
 <div class="tools">
   <div class="tool-row">
+    <div class="full">Module count: {$iconicData.modules.length}</div>
+  </div>
+  <div class="tool-row">
     {#if $iconicData.modules.length === 0}
       <div class="full">No modules to select</div>
     {:else if $selectedModule < 0 || $selectedModule >= $iconicData.modules.length}
