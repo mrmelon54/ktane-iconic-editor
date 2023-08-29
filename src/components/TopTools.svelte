@@ -1,15 +1,16 @@
 <script lang="ts">
   import {
+    containsMissingPart,
     getCurrentModuleString,
-    getNextPartCharSafe,
+    getPartByChar,
     getPartChar,
-    getPartColor,
     hoveredChar,
     selectedChar,
     selectedModule,
   } from "~/stores/editor-data";
-  import {iconicData, type iconicDataPart} from "~/stores/iconic-data";
+  import {iconicData, type iconicDataModule, type iconicDataPart} from "~/stores/iconic-data";
   import DynamicPartColor from "./DynamicPartColor.svelte";
+  import {onMount} from "svelte";
 
   let renameMode: {part: iconicDataPart; i: number} | null = null;
   let renameInput: HTMLInputElement;
@@ -21,18 +22,12 @@
     value = value.trim();
     if (value === "") {
       if (confirm("Do you want to remove this part?")) {
-        $iconicData.modules[$selectedModule].parts.splice(i, 1);
-        let raw = getCurrentModuleString($iconicData, $selectedModule);
-        raw = raw.replaceAll(getPartChar(i), " ");
-        for (let j = i; j < module.parts.length; j++) {
-          raw = raw.replaceAll(getPartChar(j + 1), getPartChar(j));
-        }
-        $iconicData.modules[$selectedModule].raw = raw;
-        $iconicData = $iconicData;
+        deletePart(module, part, i);
       }
       return;
     }
     $iconicData.modules[$selectedModule].parts[i] = {char: module.parts[i].char, name: value, color: module.parts[i].color};
+    $iconicData.modules[$selectedModule].dirty = true;
     $iconicData = $iconicData;
   }
 
@@ -42,7 +37,55 @@
 
   function renamePartBlur() {
     if (renameMode) renamePart(renameInput.value, renameMode.part, renameMode.i);
+    renameMode = null;
   }
+
+  function selectPartKeyPress(e) {
+    if (renameMode != null) return;
+    let n = getPartByChar(e.key);
+    if (n == -1) return;
+    if ($iconicData.modules.length === 0) return;
+    if ($selectedModule < 0 || $selectedModule >= $iconicData.modules.length) return;
+    let module = $iconicData.modules[$selectedModule];
+    let parts = module.parts;
+    if (n >= parts.length) {
+      let nextPart = getPartChar(parts.length);
+      addPart(module);
+      selectedChar.set(nextPart);
+      console.log("nextPart", nextPart);
+    } else {
+      selectedChar.set(e.key);
+    }
+  }
+
+  function addPart(module: iconicDataModule) {
+    module.parts.push({char: getPartChar(module.parts.length), name: "Part #" + module.parts.length, color: ""});
+    $iconicData.modules[$selectedModule].parts = module.parts;
+    $iconicData.modules[$selectedModule].dirty = true;
+    $iconicData = $iconicData;
+  }
+
+  function deletePart(module: iconicDataModule, part: iconicDataPart, i: number) {
+    $iconicData.modules[$selectedModule].parts.splice(i, 1);
+    let raw = getCurrentModuleString($iconicData, $selectedModule);
+    raw = raw.replaceAll(getPartChar(i), " ");
+    for (let j = i; j < module.parts.length; j++) {
+      raw = raw.replaceAll(getPartChar(j + 1), getPartChar(j));
+    }
+    $iconicData.modules[$selectedModule].raw = raw;
+    $iconicData.modules[$selectedModule].dirty = true;
+    $iconicData = $iconicData;
+    selectedChar.set(" ");
+    hoveredChar.set(" ");
+  }
+
+  onMount(() => {
+    window.addEventListener("keypress", selectPartKeyPress);
+
+    return () => {
+      window.removeEventListener("keypress", selectPartKeyPress);
+    };
+  });
 </script>
 
 <div class="tools">
@@ -58,11 +101,12 @@
     {#each module.parts as part, i}
       {@const partChar = getPartChar(i)}
       <button
-        class="part-row {$hoveredChar === partChar ? 'hovered' : ''} {$selectedChar === partChar ? 'selected' : ''}"
+        class="part-row"
+        class:hovered={$hoveredChar === partChar}
+        class:selected={$selectedChar === partChar}
         on:mouseenter={() => hoveredChar.set(partChar)}
         on:mouseleave={() => hoveredChar.set("")}
-        on:click={() => selectedChar.set(partChar)}
-        on:dblclick={() => (renameMode = {part, i})}
+        on:click={() => (renameMode = {part, i})}
       >
         <div class="part-color">
           <DynamicPartColor moduleIndex={$selectedModule} partIndex={i} />
@@ -74,20 +118,17 @@
           </div>
         {:else}
           <div class="part-name">{part.name}</div>
+          <button class="part-delete" on:click|preventDefault|stopPropagation={() => deletePart(module, part, i)} />
         {/if}
       </button>
     {/each}
-    <button
-      class="part-row"
-      on:click={() => {
-        module.parts.push({char: getNextPartCharSafe(module.parts), name: "Part #" + module.parts.length, color: ""});
-        $iconicData.modules[$selectedModule].parts = module.parts;
-        $iconicData = $iconicData;
-      }}
-    >
+    <button class="part-row" on:click={() => addPart(module)}>
       <div class="part-color" />
       <div class="part-char">+</div>
     </button>
+    {#if containsMissingPart(module)}
+      <div class="part-row">Missing part</div>
+    {/if}
   {/if}
 </div>
 
@@ -143,6 +184,24 @@
       .part-name {
         flex-grow: 1;
         height: 20px;
+      }
+
+      .part-delete {
+        width: 20px;
+        height: 20px;
+        position: relative;
+
+        &::after {
+          display: block;
+          position: absolute;
+          content: "\d7";
+          top: 50%;
+          left: 50%;
+          width: 100%;
+          font-size: 25px;
+          transform: translate(-50%, -50%) translateY(-2.5px);
+          pointer-events: none;
+        }
       }
     }
   }

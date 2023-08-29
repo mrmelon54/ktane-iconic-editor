@@ -16,6 +16,9 @@
     background-color: #242424;
     padding: 16px;
 
+    display: flex;
+    flex-direction: column;
+
     >.dialog-header {
       display: flex;
       justify-content: space-between;
@@ -23,6 +26,11 @@
       >h2 {
         margin: 0;
       }
+    }
+
+    >.dialog-content {
+      overflow: hidden;
+      flex-grow: 1;
     }
   }
 }

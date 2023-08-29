@@ -1,82 +1,38 @@
 <script lang="ts">
-  import {onMount} from "svelte";
-  import {getIconUrl} from "~/stores/editor-data";
+  import {getRawModuleData, type jsonRawModule} from "~/stores/ktane-json-raw";
+  import ModuleSearchBox from "./ModuleSearchBox.svelte";
   import {iconicData} from "~/stores/iconic-data";
+  import {KeyMap} from "~/utils/key-map";
 
   export let close: () => void;
 
-  let inputValue: string;
-  $: ((_: string) => {
-    readyToSubmit = null;
-  })(inputValue);
+  let rawModuleData = getRawModuleData();
+  let modulesToAdd: Set<jsonRawModule> = new Set();
+  let usedModules: KeyMap<string> = new KeyMap();
 
-  let verifying: boolean;
-  let verifyFetch: number;
-  let readyToSubmit: Array<string> | null = null;
-  let missingMods: Array<string> | null = null;
-  let existingMods: number = 0;
+  function selectedModule(e: CustomEvent<any>): void {
+    usedModules.add(e.detail.ModuleID);
+    usedModules = usedModules;
 
-  function getParsedInput(): Array<string> {
-    return inputValue.split("\n").map(x => x.trim());
+    modulesToAdd.add(e.detail);
+    modulesToAdd = modulesToAdd;
   }
 
-  async function submit() {
-    verifying = true;
-
-    // pre-parsed input is ready
-    if (readyToSubmit !== null) {
-      iconicData.update(data => {
-        readyToSubmit.forEach(x => {
-          data.modules.push({
-            key: x,
+  function addModules() {
+    iconicData.update(x => {
+      modulesToAdd.forEach(i => {
+        if (x.modules.filter(x => x.key == i.ModuleID).length == 0)
+          x.modules.push({
+            key: i.ModuleID,
             raw: " ".repeat(32 * 32),
             parts: [],
+            dirty: true,
           });
-        });
-        return data;
       });
-      close();
-      return;
-    }
-
-    let modList = correctNames(getParsedInput());
-    let modKeys = $iconicData.modules.map(x => x.key.toLowerCase());
-    let newMods = modList.filter(x => !modKeys.includes(x.toLowerCase()));
-    existingMods = modList.length - newMods.length;
-
-    let reqDone = await Promise.all(newMods.map(x => moduleCheckPromise(x)));
-    newMods = reqDone.filter(x => x.exists).map(x => x.module);
-    let missMods = reqDone.filter(x => !x.exists).map(x => x.module);
-
-    readyToSubmit = newMods;
-    missingMods = missMods;
-
-    verifying = false;
-  }
-
-  function moduleCheckPromise(module: string): Promise<{module: string; exists: boolean}> {
-    return new Promise<{module: string; exists: boolean}>((res, rej) => {
-      let xmlHttp = new XMLHttpRequest();
-      xmlHttp.open("GET", encodeURI(getIconUrl(module)));
-      xmlHttp.onreadystatechange = () => {
-        if (xmlHttp.readyState == 2) res({module, exists: xmlHttp.status === 200});
-      };
-      xmlHttp.send();
-    });
-  }
-
-  function correctNames(v: Array<string>): Array<string> {
-    return v.map(x => {
-      x = x.replaceAll("’", "'");
       return x;
     });
+    close();
   }
-
-  let inputTextarea: HTMLTextAreaElement;
-
-  onMount(() => {
-    inputTextarea.focus();
-  });
 </script>
 
 <div class="dialog-outer">
@@ -86,25 +42,17 @@
       <button class="cancel-button" on:click={() => close()}>&times;</button>
     </div>
     <div class="dialog-content">
-      <div>
-        <textarea class="add-textbox" bind:value={inputValue} bind:this={inputTextarea} />
+      <div class="moduleList">
+        {#each [...modulesToAdd] as module (module.ModuleID)}
+          <div class="module-token">{module.Name}</div>
+        {/each}
       </div>
-      {#if verifying}
-        <div>Verifying input</div>
-      {:else}
-        {#if readyToSubmit !== null && missingMods !== null}
-          <div>Submitting will add {readyToSubmit.length} module{readyToSubmit.length === 1 ? "" : "s"}.</div>
-          <div title={missingMods.join("\n")}>
-            {missingMods.length} module{missingMods.length === 1 ? "" : "s"} are missing an icon.
-            <button on:click={() => (inputValue = missingMods.join("\n"))}>Output to box</button>
-          </div>
-          <div>{existingMods} module{existingMods === 1 ? "" : "s"} are already here and were ignored.</div>
-          <div>Press the button again to add modules</div>
-        {/if}
-        <div>
-          <button on:click={() => submit()}>{readyToSubmit !== null ? "Submit" : "Verify"}</button>
-        </div>
-      {/if}
+      <div class="module-search">
+        <ModuleSearchBox moduleList={rawModuleData.KtaneModules.filter(x => !usedModules.has(x.ModuleID))} on:select={selectedModule} />
+      </div>
+      <div class="submit-wrapper">
+        <button class="submit-button" on:click={addModules}>Add Modules</button>
+      </div>
     </div>
   </div>
 </div>
@@ -112,11 +60,40 @@
 <style lang="scss">
   @import "../assets/dialog.scss";
 
-  .add-textbox {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    width: 100%;
-    height: 300px;
+  .dialog {
+    height: 70vh;
+
+    .dialog-content {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  .moduleList {
+    display: flex;
+    margin-bottom: 8px;
+    gap: 4px;
+    flex-wrap: wrap;
+
+    .module-token {
+      padding: 4px;
+      border: 1px solid red;
+      background-color: rgba(255, 0, 0, 0.2);
+      box-sizing: border-box;
+      border-radius: 4px;
+    }
+  }
+
+  .module-search {
+    flex-grow: 1;
+    overflow: hidden;
+  }
+
+  .submit-wrapper {
+    padding-block: 8px;
+
+    .submit-button {
+      padding: 4px;
+    }
   }
 </style>

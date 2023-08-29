@@ -1,17 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte/internal";
-  import {
-    getCurrentModuleString,
-    getIconUrl,
-    getNextPartCharSafe,
-    getPartChar,
-    getPartColor,
-    getPartColorByChar,
-    hoveredChar,
-    selectedChar,
-    selectedModule,
-  } from "~/stores/editor-data";
+  import {getCurrentModuleString, getIconUrl, getPartChar, getPartColorByChar, hoveredChar, selectedChar, selectedModule} from "~/stores/editor-data";
   import {iconicData, type iconicDataPart, type iconicDataType} from "~/stores/iconic-data";
+  import {getModuleById} from "~/stores/ktane-json-raw";
 
   let iconWrapper: HTMLDivElement;
   let moduleIcon: HTMLImageElement = new Image(32, 32);
@@ -47,7 +38,12 @@
       moduleIcon.src = getIconUrl("../Extra Icons/Misc/blank");
       return;
     }
-    moduleIcon.src = getIconUrl(module.key);
+    let modMeta = getModuleById(module.key);
+    if (modMeta == null) {
+      moduleIcon.src = getIconUrl("../Extra Icons/Misc/blank");
+      return;
+    }
+    moduleIcon.src = getIconUrl(modMeta.FileName || modMeta.Name || modMeta.ModuleID);
 
     parts.clear();
     let loadParts = x.modules[y].parts;
@@ -55,7 +51,7 @@
     for (let i = 0; i < loadParts.length; i++) {
       let w = loadParts[i];
       if (!w.char || w.char === "") {
-        w.char = getNextPartCharSafe(loadParts);
+        w.char = getPartChar(loadParts.length);
         updatePart = true;
       }
       parts.set(w.char, w);
@@ -65,8 +61,6 @@
       $iconicData = x;
     }
   })($iconicData, $selectedModule);
-
-  window.addEventListener("resize", resizeCanvas);
 
   function resizeCanvas() {
     C.style.width = "0";
@@ -235,10 +229,7 @@
   function replaceModuleRawChar({x, y}) {
     if (x < 0 || y < 0 || x >= 32 || y >= 32) return;
     moduleRaw = replaceAt(moduleRaw, y * 32 + x, mouseType === "draw" ? $selectedChar : " ");
-    iconicData.update(z => {
-      if (z.modules[$selectedModule]) z.modules[$selectedModule].raw = moduleRaw;
-      return z;
-    });
+    updateModuleRawData();
   }
 
   function replaceModuleRawChars(tl: {x: number; y: number}, br: {x: number; y: number}) {
@@ -251,8 +242,15 @@
     for (let y = tl.y; y < br.y + 1; y++) {
       moduleRaw = replaceAt(moduleRaw, y * 32 + tl.x, char.repeat(dx + 1));
     }
+    updateModuleRawData();
+  }
+
+  function updateModuleRawData() {
     iconicData.update(z => {
-      if (z.modules[$selectedModule]) z.modules[$selectedModule].raw = moduleRaw;
+      if (z.modules[$selectedModule]) {
+        z.modules[$selectedModule].raw = moduleRaw;
+        z.modules[$selectedModule].dirty = true;
+      }
       return z;
     });
   }
@@ -281,6 +279,14 @@
   function replaceAt(s: string, index: number, replacement: string): string {
     return s.substring(0, index) + replacement + s.substring(index + replacement.length);
   }
+
+  onMount(() => {
+    window.addEventListener("resize", resizeCanvas);
+
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+    };
+  });
 </script>
 
 <div id="icon-wrapper">

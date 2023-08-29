@@ -9,23 +9,24 @@
   import saveIcon from "~/assets/icons/save.png";
   import backIcon from "~/assets/icons/back.png";
   import FileSaver from "file-saver";
-  import {exportIconicData, iconicData} from "~/stores/iconic-data";
+  import {exportIconicData, getUnsavedCount, iconicData, resetIconicUnsaved} from "~/stores/iconic-data";
   import {selectedModule} from "~/stores/editor-data";
   import AddDialog from "./AddDialog.svelte";
   import CopyDialog from "./CopyDialog.svelte";
   import ReorderDialog from "./ReorderDialog.svelte";
   import SearchDialog from "./SearchDialog.svelte";
+  import {getModuleById} from "~/stores/ktane-json-raw";
 
   let showSearchDialog: boolean = false;
   let showAddDialog: boolean = false;
   let showReorderDialog: boolean = false;
   let showCopyDialog: boolean = false;
-  let showCopyTextDialog: boolean = false;
 
   function saveAction() {
     // JavaScript is still difficult in 2023
     var blob = new Blob([exportIconicData($iconicData)], {type: "text/plain;charset=utf-8"});
     FileSaver.saveAs(blob, "iconicData.json");
+    resetIconicUnsaved();
   }
 
   function leftAction() {
@@ -48,6 +49,28 @@
       return x;
     });
   }
+
+  function backAction() {
+    let d = $iconicData;
+    for (let i = $selectedModule + 1; i < d.modules.length; i++) {
+      if (d.modules[i].dirty) {
+        $selectedModule = i;
+        return;
+      }
+    }
+    for (let i = 0; i < $selectedModule; i++) {
+      if (d.modules[i].dirty) {
+        $selectedModule = i;
+        return;
+      }
+    }
+    alert("No more unsaved modules found");
+  }
+
+  let unsavedCount = 0;
+  iconicData.subscribe(_ => {
+    unsavedCount = getUnsavedCount();
+  });
 </script>
 
 <div class="tools">
@@ -63,7 +86,8 @@
       {selectedModule.set(0)}
     {:else}
       <button class="btn" on:click={leftAction}><img src={leftIcon} alt="Left" title="Left" /></button>
-      <div class="full module-name">{$iconicData.modules[$selectedModule].key}</div>
+      <div class="full module-name">{getModuleById($iconicData.modules[$selectedModule].key)?.Name || "Unknown Module"}</div>
+      <div class="module-count">({$selectedModule + 1}/{$iconicData.modules.length})</div>
       <button class="btn" on:click={rightAction}><img src={rightIcon} alt="Right" title="Right" /></button>
     {/if}
   </div>
@@ -76,8 +100,8 @@
   </div>
   <div class="tool-row">
     <button class="btn" on:click={saveAction}><img src={saveIcon} alt="Save" title="Save" /></button>
-    <div class="full">1 unsaved</div>
-    <button class="btn"><img src={backIcon} alt="Back" title="Back" /></button>
+    <div class="full">{unsavedCount} unsaved</div>
+    <button class="btn" on:click={backAction}><img src={backIcon} alt="Back" title="Back" /></button>
   </div>
   {#if showSearchDialog}
     <SearchDialog close={() => (showSearchDialog = false)} />
@@ -103,6 +127,7 @@
 
       .btn {
         width: 25px;
+        min-width: 25px; // stops long names breaking
         height: 25px;
         overflow: hidden;
         text-align: text;
@@ -124,6 +149,10 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         padding-inline: 8px;
+      }
+
+      .module-count {
+        padding-right: 8px;
       }
     }
   }

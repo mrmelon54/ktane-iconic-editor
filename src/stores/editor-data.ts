@@ -1,5 +1,5 @@
-import {writable} from "svelte/store";
-import type {iconicDataPart, iconicDataType} from "./iconic-data";
+import {readable, writable} from "svelte/store";
+import type {iconicDataModule, iconicDataPart, iconicDataType} from "./iconic-data";
 
 export const selectedModule = writable<number>(-1);
 
@@ -88,7 +88,11 @@ const partColors = [
 ];
 
 export function getPartColorByChar(a: string): string {
-  return getPartColor(partChars.indexOf(a));
+  return getPartColor(getPartByChar(a));
+}
+
+export function getPartByChar(a: string): number {
+  return partChars.indexOf(a);
 }
 
 export function getPartColor(n: number): string {
@@ -103,14 +107,12 @@ export function getPartChar(n: number): string {
   return partChars[n];
 }
 
-export function getNextPartCharSafe(parts: iconicDataPart[]): string {
-  let n = 0;
-  let c = getPartChar(n);
-  while (parts.findIndex(a => a.char === c) !== -1) {
-    n++;
-    c = getPartChar(n);
-    // way too many sections
-    if (c === "@") break;
+export function containsMissingPart(module: iconicDataModule): boolean {
+  let preP = module.parts.map(x => x.char);
+  if (preP.length === 0) return false;
+  let p = preP.reduce((a, b) => a + b);
+  for (let i = 0; i < module.raw.length; i++) {
+    if (p.indexOf(module.raw[i]) == -1) return false;
   }
-  return c;
+  return true;
 }

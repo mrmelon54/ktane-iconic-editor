@@ -1,4 +1,5 @@
-import {writable} from "svelte/store";
+import {get, writable} from "svelte/store";
+import {getModuleById} from "./ktane-json-raw";
 
 export type iconicDataType = {
   _: string;
@@ -9,6 +10,7 @@ export type iconicDataModule = {
   key: string;
   raw: string;
   parts: Array<iconicDataPart>;
+  dirty: boolean;
 };
 
 export type iconicDataPart = {
@@ -70,7 +72,7 @@ function isUnique(x: Array<any>, f: (x: any) => any): boolean {
   );
 }
 
-const initialIconicData = getInitialIconicData();
+var initialIconicData = getInitialIconicData();
 
 export const iconicData = writable<iconicDataType>(initialIconicData);
 
@@ -97,14 +99,6 @@ iconicData.subscribe(a => {
 
   // save to localStorage
   if (localStorage) localStorage.setItem("__iconicData", JSON.stringify(a));
-
-  let n = Math.min(a.modules.length, initialIconicData.modules.length);
-
-  for (let i = 0; i < n; i++) {
-    if (JSON.stringify(initialIconicData[i]) !== JSON.stringify(a[i])) {
-      iconicUnsaved.update(x => (x.add(a[i].key), x));
-    }
-  }
 });
 
 export const iconicUnsaved = writable<Set<string>>(new Set());
@@ -119,8 +113,10 @@ export function exportIconicData(iconicData: iconicDataType): string {
   a += '    "modules": [\n';
   for (let i = 0; i < iconicData.modules.length; i++) {
     let m = iconicData.modules[i];
+    let m2 = getModuleById(m.key);
     a += "        {\n";
     a += '            "key": "' + m.key + '",\n';
+    a += '            "icon": "' + (m2?.FileName || m2?.Name || m2?.ModuleID) + '",\n';
     a += '            "raw": "' + m.raw + '",\n';
     a += '            "parts": ' + JSON.stringify(m.parts.map(x => x.name)) + "\n";
     a += "        }" + (i + 1 === iconicData.modules.length ? "" : ",") + "\n";
@@ -128,4 +124,24 @@ export function exportIconicData(iconicData: iconicDataType): string {
   a += "    ]\n";
   a += "}\n";
   return a;
+}
+
+export function getUnsavedCount(): number {
+  let m = get(iconicData).modules;
+  let c = 0;
+  for (let i = 0; i < m.length; i++) {
+    if (m[i].dirty) c++;
+  }
+  return c;
+}
+
+export function resetIconicUnsaved() {
+  iconicData.update(x => {
+    x.modules.map(i => {
+      i.dirty = false;
+      return i;
+    });
+    return x;
+  });
+  initialIconicData = get(iconicData);
 }
