@@ -14,7 +14,6 @@ export type iconicDataModule = {
 };
 
 export type iconicDataPart = {
-  char: string;
   name: string;
   color: string;
 };

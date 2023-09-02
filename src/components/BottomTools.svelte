@@ -85,8 +85,9 @@
       <div class="full">Invalid module selected</div>
       {selectedModule.set(0)}
     {:else}
+      {@const modName = getModuleById($iconicData.modules[$selectedModule].key)?.Name || "Unknown Module"}
       <button class="btn" on:click={leftAction}><img src={leftIcon} alt="Left" title="Left" /></button>
-      <div class="full module-name">{getModuleById($iconicData.modules[$selectedModule].key)?.Name || "Unknown Module"}</div>
+      <div class="full module-name" title={modName}>{modName}</div>
       <div class="module-count">({$selectedModule + 1}/{$iconicData.modules.length})</div>
       <button class="btn" on:click={rightAction}><img src={rightIcon} alt="Right" title="Right" /></button>
     {/if}

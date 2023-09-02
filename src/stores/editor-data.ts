@@ -108,7 +108,7 @@ export function getPartChar(n: number): string {
 }
 
 export function containsMissingPart(module: iconicDataModule): boolean {
-  let preP = module.parts.map(x => x.char);
+  let preP = module.parts.map((_, i) => getPartChar(i));
   if (preP.length === 0) return false;
   let p = preP.reduce((a, b) => a + b);
   for (let i = 0; i < module.raw.length; i++) {

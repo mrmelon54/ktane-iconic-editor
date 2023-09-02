@@ -26,7 +26,7 @@
       }
       return;
     }
-    $iconicData.modules[$selectedModule].parts[i] = {char: module.parts[i].char, name: value, color: module.parts[i].color};
+    $iconicData.modules[$selectedModule].parts[i] = {name: value, color: module.parts[i].color};
     $iconicData.modules[$selectedModule].dirty = true;
     $iconicData = $iconicData;
   }

@@ -1,8 +1,13 @@
 export class KeyMap<T> {
   m: Map<T, void>;
 
-  constructor() {
+  constructor();
+
+  constructor(arr: T[]);
+
+  constructor(arr?: T[]) {
     this.m = new Map();
+    if (arr) arr.forEach(x => this.add(x));
   }
 
   add(key: T) {

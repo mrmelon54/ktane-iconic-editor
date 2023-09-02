@@ -5,8 +5,8 @@
   import TopTools from "./components/TopTools.svelte";
   import {iconicData, isIconicDataType} from "./stores/iconic-data";
   import {updateOnLoad} from "./stores/editor-data";
-  
-  function onFileSelected(files) {
+
+  function onFileSelected(files: FileList) {
     let image = files[0];
     let reader = new FileReader();
     reader.readAsText(image);
@@ -22,10 +22,9 @@
     };
   }
 
-  let dropArea;
-  let fileinput;
+  let dropArea: HTMLDivElement;
 
-  function dragEnter(e) {
+  function dragEnter(e: DragEvent) {
     if (e.dataTransfer.items[0].kind === "file") {
       e.preventDefault();
       e.stopPropagation();
@@ -35,7 +34,7 @@
     }
   }
 
-  function dragLeave(e) {
+  function dragLeave(e: DragEvent) {
     if (e.dataTransfer.items[0].kind === "file") {
       e.preventDefault();
       e.stopPropagation();
@@ -43,7 +42,7 @@
     }
   }
 
-  function handleDrop(e) {
+  function handleDrop(e: DragEvent) {
     if (e.dataTransfer.items[0].kind === "file") {
       dragLeave(e);
       onFileSelected(e.dataTransfer.files);
@@ -82,7 +81,7 @@
 </div>
 
 <!-- file upload -->
-<input style="display:none" type="file" accept=".json" on:change={() => onFileSelected(this.files)} bind:this={fileinput} />
+<input style="display:none" type="file" accept=".json" on:change={() => onFileSelected(this.files)} />
 
 <style lang="scss">
   #content {
@@ -101,6 +100,7 @@
       display: flex;
       height: 100%;
       min-width: 300px;
+      max-width: 300px;
       justify-content: space-between;
       flex-direction: column;
     }

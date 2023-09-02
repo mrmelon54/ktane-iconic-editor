@@ -10,6 +10,12 @@
   let modulesToAdd: Set<jsonRawModule> = new Set();
   let usedModules: KeyMap<string> = new KeyMap();
 
+  let ktaneIconicModules: KeyMap<string>;
+  $: ktaneIconicModules = new KeyMap($iconicData.modules.map(x => x.key));
+
+  let filteredModuleList: jsonRawModule[];
+  $: filteredModuleList = rawModuleData.KtaneModules.filter(x => !ktaneIconicModules.has(x.ModuleID) && !usedModules.has(x.ModuleID));
+
   function selectedModule(e: CustomEvent<any>): void {
     usedModules.add(e.detail.ModuleID);
     usedModules = usedModules;
@@ -48,7 +54,7 @@
         {/each}
       </div>
       <div class="module-search">
-        <ModuleSearchBox moduleList={rawModuleData.KtaneModules.filter(x => !usedModules.has(x.ModuleID))} on:select={selectedModule} />
+        <ModuleSearchBox moduleList={filteredModuleList} on:select={selectedModule} />
       </div>
       <div class="submit-wrapper">
         <button class="submit-button" on:click={addModules}>Add Modules</button>

@@ -47,18 +47,9 @@
 
     parts.clear();
     let loadParts = x.modules[y].parts;
-    let updatePart: boolean = false;
     for (let i = 0; i < loadParts.length; i++) {
       let w = loadParts[i];
-      if (!w.char || w.char === "") {
-        w.char = getPartChar(loadParts.length);
-        updatePart = true;
-      }
-      parts.set(w.char, w);
-    }
-    if (updatePart) {
-      x.modules[y].parts = loadParts;
-      $iconicData = x;
+      parts.set(getPartChar(i), w);
     }
   })($iconicData, $selectedModule);
 
@@ -96,11 +87,6 @@
             ctx.fillStyle = `rgba(${z[0]},${z[1]},${z[2]},${z[3]})`;
             ctx.fillRect(i * s + o, j * s + o, s, s);
 
-            ctx.fillStyle = colorContrast(z[0], z[1], z[2]);
-            ctx.font = "16px Arial";
-            ctx.textBaseline = "middle";
-            ctx.fillText(r, i * s + s2 - 5 + o, j * s + s2 + o);
-
             if (r !== " ") {
               if (selChar == r) {
                 ctx.fillStyle = "yellow";
@@ -113,6 +99,12 @@
                 if (j === 31 || r !== moduleRaw[(j + 1) * 32 + i]) borderBottom(ctx, i * s, j * s, s, s, o);
               }
             }
+
+            // render text above the border
+            ctx.fillStyle = colorContrast(z[0], z[1], z[2]);
+            ctx.font = "16px Arial";
+            ctx.textBaseline = "middle";
+            ctx.fillText(r, i * s + s2 - 5 + o, j * s + s2 + o);
           }
         }
 
@@ -220,6 +212,7 @@
   }
 
   function findPartColor(x: string) {
+    console.log(parts);
     if (!parts.has(x)) return "#ffffff";
     let a = parts.get(x).color;
     if (!a || a === "") return getPartColorByChar(x);
