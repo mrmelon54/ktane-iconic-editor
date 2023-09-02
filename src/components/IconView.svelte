@@ -212,7 +212,6 @@
   }
 
   function findPartColor(x: string) {
-    console.log(parts);
     if (!parts.has(x)) return "#ffffff";
     let a = parts.get(x).color;
     if (!a || a === "") return getPartColorByChar(x);
