@@ -10,7 +10,6 @@
   } from "~/stores/editor-data";
   import {iconicData, type iconicDataModule, type iconicDataPart} from "~/stores/iconic-data";
   import DynamicPartColor from "./DynamicPartColor.svelte";
-  import {onMount} from "svelte";
 
   let renameMode: {part: iconicDataPart; i: number} | null = null;
   let renameInput: HTMLInputElement;
@@ -78,15 +77,9 @@
     selectedChar.set(" ");
     hoveredChar.set(" ");
   }
-
-  onMount(() => {
-    window.addEventListener("keypress", selectPartKeyPress);
-
-    return () => {
-      window.removeEventListener("keypress", selectPartKeyPress);
-    };
-  });
 </script>
+
+<svelte:window on:keypress|stopPropagation={selectPartKeyPress} />
 
 <div class="tools">
   {#if $iconicData.modules.length === 0}
@@ -114,7 +107,13 @@
         <div class="part-char">{partChar}</div>
         {#if renameMode && renameMode.part === part && renameMode.i === i}
           <div class="part-rename">
-            <input type="text" value={part.name} bind:this={renameInput} on:blur={() => renamePartBlur()} on:keydown={e => renamePartKeyPress(e)} />
+            <input
+              type="text"
+              value={part.name}
+              bind:this={renameInput}
+              on:blur={() => renamePartBlur()}
+              on:keydown|stopPropagation={e => renamePartKeyPress(e)}
+            />
           </div>
         {:else}
           <div class="part-name">{part.name}</div>

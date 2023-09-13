@@ -271,15 +271,9 @@
   function replaceAt(s: string, index: number, replacement: string): string {
     return s.substring(0, index) + replacement + s.substring(index + replacement.length);
   }
-
-  onMount(() => {
-    window.addEventListener("resize", resizeCanvas);
-
-    return () => {
-      window.removeEventListener("resize", resizeCanvas);
-    };
-  });
 </script>
+
+<svelte:window on:resize={resizeCanvas} />
 
 <div id="icon-wrapper">
   <div id="icon-size" bind:this={iconWrapper}>
@@ -291,8 +285,8 @@
       on:mouseup={canvasMouseUp}
       on:mouseleave={canvasMouseLeave}
       on:contextmenu={ev => ev.preventDefault()}
-      on:keydown={canvasKeyChange}
-      on:keyup={canvasKeyChange}
+      on:keydown|stopPropagation={canvasKeyChange}
+      on:keyup|stopPropagation={canvasKeyChange}
     />
     <canvas bind:this={moduleCanvas} id="module-icon-hidden" />
   </div>

@@ -84,7 +84,7 @@
   }
 </script>
 
-<svelte:window on:keydown={pressArrowKey} />
+<svelte:window on:keydown|stopPropagation={pressArrowKey} />
 
 <div class="tools">
   <div class="tool-row">
