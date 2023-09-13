@@ -71,7 +71,20 @@
   iconicData.subscribe(_ => {
     unsavedCount = getUnsavedCount();
   });
+
+  function pressArrowKey(event: KeyboardEvent & {currentTarget: EventTarget & Window}) {
+    switch (event.key) {
+      case "ArrowLeft":
+        leftAction();
+        break;
+      case "ArrowRight":
+        rightAction();
+        break;
+    }
+  }
 </script>
+
+<svelte:window on:keydown={pressArrowKey} />
 
 <div class="tools">
   <div class="tool-row">
