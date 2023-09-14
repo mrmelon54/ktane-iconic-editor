@@ -47,4 +47,15 @@
 
 <style lang="scss">
   @import "../assets/dialog.scss";
+
+  .dialog-content {
+    display: flex;
+    flex-direction: column;
+
+    > div {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+  }
 </style>

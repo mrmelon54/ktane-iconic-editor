@@ -66,13 +66,9 @@
 <style lang="scss">
   @import "../assets/dialog.scss";
 
-  .dialog {
-    height: 70vh;
-
-    .dialog-content {
-      display: flex;
-      flex-direction: column;
-    }
+  .dialog-content {
+    display: flex;
+    flex-direction: column;
   }
 
   .moduleList {
@@ -91,6 +87,8 @@
   }
 
   .module-search {
+    display: flex;
+    flex-direction: column;
     flex-grow: 1;
     overflow: hidden;
   }
