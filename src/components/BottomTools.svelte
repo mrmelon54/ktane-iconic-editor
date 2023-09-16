@@ -10,17 +10,21 @@
   import backIcon from "~/assets/icons/back.png";
   import FileSaver from "file-saver";
   import {exportIconicData, getUnsavedCount, iconicData, resetIconicUnsaved} from "~/stores/iconic-data";
-  import {selectedModule} from "~/stores/editor-data";
+  import {getIconUrl, selectedModule} from "~/stores/editor-data";
   import AddDialog from "./AddDialog.svelte";
   import CopyDialog from "./CopyDialog.svelte";
   import ReorderDialog from "./ReorderDialog.svelte";
   import SearchDialog from "./SearchDialog.svelte";
   import {getModuleById} from "~/stores/ktane-json-raw";
+  import InvalidIconErrorDialog from "./InvalidIconErrorDialog.svelte";
 
   let showSearchDialog: boolean = false;
   let showAddDialog: boolean = false;
   let showReorderDialog: boolean = false;
   let showCopyDialog: boolean = false;
+  let showIconErrorDialog: boolean = false;
+
+  let invalidIcons: string[];
 
   function saveAction() {
     // JavaScript is still difficult in 2023
@@ -82,6 +86,33 @@
         break;
     }
   }
+
+  function testModuleIcons() {
+    let files = $iconicData.modules.map(x => (x as unknown as {icon: string}).icon);
+    let p = Promise.allSettled(
+      files.map(
+        x =>
+          new Promise((res, rej) => {
+            fetch(getIconUrl(x))
+              .then(y => res({status: y.status, icon: x}))
+              .catch(_ => res({status: 999, icon: x}));
+          }),
+      ),
+    );
+    p.then(x => {
+      console.log(x);
+      let x2 = x.map(y => (y as unknown as {value: {status: number; icon: string}}).value).filter(x => x.status != 200);
+      x2.forEach(y => {
+        console.log("Missing icon: " + y.icon);
+      });
+      if (x2.length === 0) {
+        alert("There are no missing or invalid icons");
+      } else {
+        invalidIcons = x2.map(y => y.icon);
+        showIconErrorDialog = true;
+      }
+    });
+  }
 </script>
 
 <svelte:window on:keydown|stopPropagation={pressArrowKey} />
@@ -111,6 +142,7 @@
     <button class="btn" on:click={renameAction}><img src={renameIcon} alt="Rename" title="Rename" /></button>
     <button class="btn" on:click={() => (showReorderDialog = true)}><img src={reorderIcon} alt="Reorder" title="Reorder" /></button>
     <button class="btn" on:click={() => (showCopyDialog = true)}><img src={copyIcon} alt="Copy Parts and Text" title="Copy Parts and Text" /></button>
+    <button class="btn" on:click={() => testModuleIcons()}><img src={""} alt="Test Module Icons" title="Test Module Icons" /></button>
   </div>
   <div class="tool-row">
     <button class="btn" on:click={saveAction}><img src={saveIcon} alt="Save" title="Save" /></button>
@@ -128,6 +160,9 @@
   {/if}
   {#if showCopyDialog}
     <CopyDialog close={() => (showCopyDialog = false)} />
+  {/if}
+  {#if showIconErrorDialog}
+    <InvalidIconErrorDialog close={() => (showIconErrorDialog = false)} {invalidIcons} />
   {/if}
 </div>
 
