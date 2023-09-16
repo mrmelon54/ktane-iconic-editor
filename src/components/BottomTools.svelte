@@ -88,7 +88,7 @@
   }
 
   function testModuleIcons() {
-    let files = $iconicData.modules.map(x => (x as unknown as {icon: string}).icon);
+    let files = $iconicData.modules.map(x => getModuleById(x.key)).map(x => x.FileName || x.Name);
     let p = Promise.allSettled(
       files.map(
         x =>
