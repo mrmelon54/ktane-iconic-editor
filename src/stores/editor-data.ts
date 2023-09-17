@@ -20,7 +20,7 @@ function capString(s: string, len: number) {
 }
 
 export function getIconUrl(module: string) {
-  return "https://ktane-icons.mrmelon54.com/Module Icons/" + encodeURIComponent(module) + ".png";
+  return "https://ktane-icons.mrmelon54.com/Module%20Icons/" + encodeURIComponent(module) + ".png";
 }
 
 const partColors = [

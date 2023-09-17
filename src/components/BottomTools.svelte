@@ -10,7 +10,7 @@
   import backIcon from "~/assets/icons/back.png";
   import FileSaver from "file-saver";
   import {exportIconicData, getUnsavedCount, iconicData, resetIconicUnsaved} from "~/stores/iconic-data";
-  import {getIconUrl, selectedModule} from "~/stores/editor-data";
+  import {selectedModule} from "~/stores/editor-data";
   import AddDialog from "./AddDialog.svelte";
   import CopyDialog from "./CopyDialog.svelte";
   import ReorderDialog from "./ReorderDialog.svelte";
@@ -24,11 +24,11 @@
   let showCopyDialog: boolean = false;
   let showIconErrorDialog: boolean = false;
 
-  let invalidIcons: string[];
+  let invalidIcons: {name: string; found: boolean; caseIssue: boolean}[];
 
   function saveAction() {
     // JavaScript is still difficult in 2023
-    var blob = new Blob([exportIconicData($iconicData)], {type: "text/plain;charset=utf-8"});
+    var blob = new Blob([exportIconicData($iconicData)], {type: "text/plain; charset=utf-8"});
     FileSaver.saveAs(blob, "iconicData.json");
     resetIconicUnsaved();
   }
@@ -88,30 +88,33 @@
   }
 
   function testModuleIcons() {
-    let files = $iconicData.modules.map(x => getModuleById(x.key)).map(x => x.FileName || x.Name);
-    let p = Promise.allSettled(
-      files.map(
-        x =>
-          new Promise((res, rej) => {
-            fetch(getIconUrl(x))
-              .then(y => res({status: y.status, icon: x}))
-              .catch(_ => res({status: 999, icon: x}));
-          }),
-      ),
-    );
-    p.then(x => {
-      console.log(x);
-      let x2 = x.map(y => (y as unknown as {value: {status: number; icon: string}}).value).filter(x => x.status != 200);
-      x2.forEach(y => {
-        console.log("Missing icon: " + y.icon);
+    fetch("https://ktane-icons.mrmelon54.com/Module%20Icons/valid-files.json?_=" + new Date().getTime())
+      .then(async resp => await resp.json())
+      .then((validFiles: string[]) => {
+        console.log("Valid files: ", validFiles);
+        let validSet = new Set(validFiles);
+        let validLowerSet = new Set(validFiles.map(x => x.toLowerCase()));
+        let files = $iconicData.modules
+          .map(x => getModuleById(x.key))
+          .map(x => x.FileName || x.Name)
+          .map(x => x + ".png");
+        let missingFiles = files
+          .map(x => ({
+            name: x,
+            found: validSet.has(x),
+            caseIssue: validLowerSet.has(x.toLowerCase()),
+          }))
+          .filter(x => !x.found);
+        if (missingFiles.length === 0) {
+          alert("There are no missing or invalid icons");
+        } else {
+          invalidIcons = missingFiles;
+          showIconErrorDialog = true;
+        }
+      })
+      .catch(x => {
+        alert("Failed to test module icons: " + x.reason);
       });
-      if (x2.length === 0) {
-        alert("There are no missing or invalid icons");
-      } else {
-        invalidIcons = x2.map(y => y.icon);
-        showIconErrorDialog = true;
-      }
-    });
   }
 </script>
 

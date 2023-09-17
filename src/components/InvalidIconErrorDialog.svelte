@@ -1,12 +1,9 @@
 <script lang="ts">
-  import {iconicData} from "~/stores/iconic-data";
-  import ModuleSearchBox from "./ModuleSearchBox.svelte";
-  import {selectedModule} from "~/stores/editor-data";
-  import {getRawModuleData, type jsonRawModule} from "~/stores/ktane-json-raw";
-
   export let close: () => void;
 
-  export let invalidIcons: string[];
+  export let invalidIcons: {name: string; found: boolean; caseIssue: boolean}[];
+
+  $: console.log(invalidIcons);
 </script>
 
 <div class="dialog-outer">
@@ -17,9 +14,12 @@
     </div>
     <div class="dialog-content">
       <p>Invalid module icons are listed below:</p>
-      <ul>
+      <ul class="error-list">
         {#each invalidIcons as i (i)}
-          <li>{i}</li>
+          <li>
+            <span>{i.name}</span>
+            {#if i.caseIssue}<span> - case issue detected</span>{/if}
+          </li>
         {/each}
       </ul>
     </div>
@@ -38,5 +38,9 @@
       flex-direction: column;
       overflow: hidden;
     }
+  }
+
+  .error-list {
+    overflow-y: auto;
   }
 </style>
