@@ -109,10 +109,9 @@ export function getPartChar(n: number): string {
 
 export function containsMissingPart(module: iconicDataModule): boolean {
   let preP = module.parts.map((_, i) => getPartChar(i));
-  if (preP.length === 0) return false;
-  let p = preP.reduce((a, b) => a + b);
+  let p = preP.length === 0 ? "" : preP.reduce((a, b) => a + b);
   for (let i = 0; i < module.raw.length; i++) {
-    if (p.indexOf(module.raw[i]) == -1) return false;
+    if (module.raw[i] != " " && p.indexOf(module.raw[i]) == -1) return true;
   }
-  return true;
+  return false;
 }
