@@ -8,6 +8,7 @@
   import copyIcon from "~/assets/icons/copyparts.png";
   import saveIcon from "~/assets/icons/save.png";
   import backIcon from "~/assets/icons/back.png";
+  import testIcon from "~/assets/icons/test.png";
   import FileSaver from "file-saver";
   import {exportIconicData, getUnsavedCount, iconicData, resetIconicUnsaved} from "~/stores/iconic-data";
   import {selectedModule} from "~/stores/editor-data";
@@ -145,7 +146,7 @@
     <button class="btn" on:click={renameAction}><img src={renameIcon} alt="Rename" title="Rename" /></button>
     <button class="btn" on:click={() => (showReorderDialog = true)}><img src={reorderIcon} alt="Reorder" title="Reorder" /></button>
     <button class="btn" on:click={() => (showCopyDialog = true)}><img src={copyIcon} alt="Copy Parts and Text" title="Copy Parts and Text" /></button>
-    <button class="btn" on:click={() => testModuleIcons()}><img src={""} alt="Test Module Icons" title="Test Module Icons" /></button>
+    <button class="btn" on:click={() => testModuleIcons()}><img src={testIcon} alt="Test Module Icons" title="Test Module Icons" /></button>
   </div>
   <div class="tool-row">
     <button class="btn" on:click={saveAction}><img src={saveIcon} alt="Save" title="Save" /></button>
