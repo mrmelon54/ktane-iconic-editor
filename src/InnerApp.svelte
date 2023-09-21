@@ -7,9 +7,9 @@
   import {updateOnLoad} from "./stores/editor-data";
 
   function onFileSelected(files: FileList) {
-    let image = files[0];
+    let inputFile = files[0];
     let reader = new FileReader();
-    reader.readAsText(image);
+    reader.readAsText(inputFile);
     reader.onload = e => {
       try {
         let j = JSON.parse(e.target.result as string);
@@ -62,10 +62,13 @@
   }
 </script>
 
-<div id="content" on:dragenter={dragEnter} on:dragover={dragEnter} on:dragleave={dragLeave} on:drop={handleDrop} bind:this={dropArea}>
+<div id="content">
   <div id="left-tools" />
-  <div id="icon-view">
+  <div id="icon-view" on:dragenter={dragEnter} on:dragover={dragEnter} on:dragleave={dragLeave} on:drop={handleDrop} bind:this={dropArea}>
     <IconView />
+    <div id="dragDropOverlay">
+      <div>Drop file to upload</div>
+    </div>
   </div>
   <div id="right-tools">
     <div id="top-tools">
@@ -74,9 +77,6 @@
     <div id="bottom-tools">
       <BottomTools />
     </div>
-  </div>
-  <div id="dragDropOverlay">
-    <div>Drop file to upload</div>
   </div>
 </div>
 

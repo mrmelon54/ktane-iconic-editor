@@ -9,8 +9,13 @@ export function loadRawModuleData(): Promise<void> {
     let xmlHttp = new XMLHttpRequest();
     xmlHttp.open("GET", "https://ktane-mirror.mrmelon54.com/json/raw");
     xmlHttp.onload = () => {
-      console.log(JSON.parse(xmlHttp.responseText));
-      internalRawModuleStore.set(JSON.parse(xmlHttp.responseText) as jsonRawType);
+      let j = JSON.parse(xmlHttp.responseText) as jsonRawType;
+      let km = j.KtaneModules;
+      km = km.filter(x => x.Type === "Regular" || x.Type === "Needy");
+      km = km.filter(x => !x.TranslationOf);
+      j.KtaneModules = km;
+      console.log(j);
+      internalRawModuleStore.set(j);
       res();
     };
     xmlHttp.onerror = () => {
@@ -41,4 +46,6 @@ export type jsonRawMeta = {
   SteamID: string;
   Symbol: string;
   FileName: string;
+  Type: string;
+  TranslationOf?: string;
 };
