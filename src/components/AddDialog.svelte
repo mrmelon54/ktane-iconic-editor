@@ -44,67 +44,15 @@
     close();
   }
 
-  function onFileSelected(files: FileList) {
-    let inputFile = files[0];
-    let reader = new FileReader();
-    reader.readAsText(inputFile);
-    reader.onload = e => {
-      try {
-        let lines = (reader.result as string).split(/\r?\n/);
-        let missing = [];
-        for (const x of lines) {
-          let m = rawModuleData.KtaneModules.filter(y => y.Name === x);
-          console.log("x:", x);
-          console.log("m:", m);
-          if (m.length === 0) {
-            missing.push(x);
-            continue;
-          }
-          if (m.length !== 1) throw new Error("How did we get here? This module somehow exists twice?");
-          let a = filteredModuleList.find(y => y.ModuleID === m[0].ModuleID);
-          console.log("a:", a);
-          if (a == undefined) continue;
-          addSingleModule(a);
-        }
-        if (missing.length !== 0) {
-          alert("Missing modules:\n" + missing.join("\n"));
-        }
-      } catch (e) {
-        alert("Failed to parse modules file: " + e);
-      }
-    };
-  }
-
-  let dropArea: HTMLDivElement;
-
-  function dragEnter(e: DragEvent) {
-    if (e.dataTransfer.items[0].kind === "file") {
-      e.preventDefault();
-      e.stopPropagation();
-      dropArea.classList.add("highlight");
-    } else {
-      dropArea.classList.remove("highlight");
-    }
-  }
-
-  function dragLeave(e: DragEvent) {
-    if (e.dataTransfer.items[0].kind === "file") {
-      e.preventDefault();
-      e.stopPropagation();
-      dropArea.classList.remove("highlight");
-    }
-  }
-
-  function handleDrop(e: DragEvent) {
-    if (e.dataTransfer.items[0].kind === "file") {
-      dragLeave(e);
-      onFileSelected(e.dataTransfer.files);
-    }
+  function selectAll() {
+    filteredModuleList.forEach(x => {
+      addSingleModule(x);
+    });
   }
 </script>
 
 <div class="dialog-outer">
-  <div class="dialog" on:dragenter={dragEnter} on:dragover={dragEnter} on:dragleave={dragLeave} on:drop={handleDrop} bind:this={dropArea}>
+  <div class="dialog">
     <div class="dialog-header">
       <h2>Add Modules</h2>
       <button class="cancel-button" on:click={() => close()}>&times;</button>
@@ -122,6 +70,7 @@
       </div>
       <div class="submit-wrapper">
         <button class="submit-button" on:click={addModules}>Add Modules</button>
+        <button class="submit-button" on:click={selectAll}>Select All Remaining Modules</button>
       </div>
     </div>
     <div id="dragDropOverlay">

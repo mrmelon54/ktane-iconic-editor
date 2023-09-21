@@ -62,9 +62,9 @@
   }
 </script>
 
-<div id="content">
+<div id="content" on:dragenter={dragEnter} on:dragover={dragEnter} on:dragleave={dragLeave} on:drop={handleDrop} bind:this={dropArea}>
   <div id="left-tools" />
-  <div id="icon-view" on:dragenter={dragEnter} on:dragover={dragEnter} on:dragleave={dragLeave} on:drop={handleDrop} bind:this={dropArea}>
+  <div id="icon-view">
     <IconView />
     <div id="dragDropOverlay">
       <div>Drop file to upload</div>

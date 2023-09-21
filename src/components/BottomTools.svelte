@@ -18,6 +18,7 @@
   import SearchDialog from "./SearchDialog.svelte";
   import {getModuleById} from "~/stores/ktane-json-raw";
   import InvalidIconErrorDialog from "./InvalidIconErrorDialog.svelte";
+  import {filterInvalidIcons} from "~/stores/ktane-icons-raw";
 
   let showSearchDialog: boolean = false;
   let showAddDialog: boolean = false;
@@ -89,33 +90,13 @@
   }
 
   function testModuleIcons() {
-    fetch("https://ktane-icons.mrmelon54.com/Module%20Icons/valid-files.json?_=" + new Date().getTime())
-      .then(async resp => await resp.json())
-      .then((validFiles: string[]) => {
-        console.log("Valid files: ", validFiles);
-        let validSet = new Set(validFiles);
-        let validLowerSet = new Set(validFiles.map(x => x.toLowerCase()));
-        let files = $iconicData.modules
-          .map(x => getModuleById(x.key))
-          .map(x => x.FileName || x.Name)
-          .map(x => x + ".png");
-        let missingFiles = files
-          .map(x => ({
-            name: x,
-            found: validSet.has(x),
-            caseIssue: validLowerSet.has(x.toLowerCase()),
-          }))
-          .filter(x => !x.found);
-        if (missingFiles.length === 0) {
-          alert("There are no missing or invalid icons");
-        } else {
-          invalidIcons = missingFiles;
-          showIconErrorDialog = true;
-        }
-      })
-      .catch(x => {
-        alert("Failed to test module icons: " + x.reason);
-      });
+    let missingFiles = filterInvalidIcons($iconicData.modules);
+    if (missingFiles.length === 0) {
+      alert("There are no missing or invalid icons");
+    } else {
+      invalidIcons = missingFiles;
+      showIconErrorDialog = true;
+    }
   }
 </script>
 
@@ -124,6 +105,12 @@
 <div class="tools">
   <div class="tool-row">
     <div class="full">Module count: {$iconicData.modules.length}</div>
+  </div>
+  <div class="tool-row">
+    <div class="full">Unknown module count: {$iconicData.modules.filter(x => getModuleById(x.key) == null).length}</div>
+  </div>
+  <div class="tool-row">
+    <div class="full">Invalid icon count: {filterInvalidIcons($iconicData.modules).length}</div>
   </div>
   <div class="tool-row">
     {#if $iconicData.modules.length === 0}
