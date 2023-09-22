@@ -19,7 +19,7 @@ export function loadRawIconsData() {
     let xmlHttp = new XMLHttpRequest();
     xmlHttp.open("GET", "https://ktane-icons.mrmelon54.com/Module%20Icons/valid-files.json?_=" + new Date().getTime());
     xmlHttp.onload = () => {
-      let j = JSON.parse(xmlHttp.responseText) as iconsRawType;
+      let j = JSON.parse(xmlHttp.responseText) as string[];
       internalRawIconsStore.set(new Set(j));
       internalRawIconsLowerStore.set(new Set(j.map(x => x.toLowerCase())));
       res();

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {getRawModuleData, type jsonRawModule} from "~/stores/ktane-json-raw";
   import ModuleSearchBox from "./ModuleSearchBox.svelte";
-  import {iconicData} from "~/stores/iconic-data";
+  import {iconicData, sortIconicModules} from "~/stores/iconic-data";
   import {KeyMap} from "~/utils/key-map";
 
   export let close: () => void;
@@ -39,6 +39,7 @@
             dirty: true,
           });
       });
+      sortIconicModules(x);
       return x;
     });
     close();

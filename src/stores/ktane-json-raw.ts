@@ -48,4 +48,5 @@ export type jsonRawMeta = {
   FileName: string;
   Type: string;
   TranslationOf?: string;
+  Published?: string;
 };

@@ -4,7 +4,6 @@
   import searchIcon from "~/assets/icons/search.png";
   import addIcon from "~/assets/icons/add.png";
   import renameIcon from "~/assets/icons/rename.png";
-  import reorderIcon from "~/assets/icons/reorder.png";
   import copyIcon from "~/assets/icons/copyparts.png";
   import saveIcon from "~/assets/icons/save.png";
   import backIcon from "~/assets/icons/back.png";
@@ -131,7 +130,7 @@
     <button class="btn" on:click={() => (showSearchDialog = true)}><img src={searchIcon} alt="Search" title="Search" /></button>
     <button class="btn" on:click={() => (showAddDialog = true)}><img src={addIcon} alt="Add" title="Add" /></button>
     <button class="btn" on:click={renameAction}><img src={renameIcon} alt="Rename" title="Rename" /></button>
-    <button class="btn" on:click={() => (showReorderDialog = true)}><img src={reorderIcon} alt="Reorder" title="Reorder" /></button>
+    <!--<button class="btn" on:click={() => (showReorderDialog = true)}><img src={reorderIcon} alt="Reorder" title="Reorder" /></button>-->
     <button class="btn" on:click={() => (showCopyDialog = true)}><img src={copyIcon} alt="Copy Parts and Text" title="Copy Parts and Text" /></button>
     <button class="btn" on:click={() => testModuleIcons()}><img src={testIcon} alt="Test Module Icons" title="Test Module Icons" /></button>
   </div>
