@@ -30,6 +30,9 @@
     moduleCtx.drawImage(moduleIcon, 0, 0);
     imData = moduleCtx.getImageData(0, 0, 32, 32);
   });
+  moduleIcon.addEventListener("error", () => {
+    imData = null;
+  });
 
   $: ((x: iconicDataType, y: number) => {
     moduleIcon.crossOrigin = "anonymous";
@@ -78,14 +81,30 @@
       let s2 = s / 2;
       let o = Math.floor((C.clientWidth - s * 32) / 2);
       let selChar = $hoveredChar;
+
       if (imData) {
         for (let i = 0; i < 32; i++) {
           for (let j = 0; j < 32; j++) {
             let z = [imPix(i, j, 0), imPix(i, j, 1), imPix(i, j, 2), imPix(i, j, 3)];
             let r = moduleRaw[j * 32 + i];
 
-            ctx.fillStyle = `rgba(${z[0]},${z[1]},${z[2]},${z[3]})`;
-            ctx.fillRect(i * s + o, j * s + o, s, s);
+            // if the pixel is fully transparent
+            // but the color is not #00000000 rgba(0, 0, 0, 0)
+            // then change the color to hot pink fully opaque
+            if (z[0] + z[1] + z[2] != 0 && z[3] == 0) {
+              // paint top-left and bottom-right hotpink
+              ctx.fillStyle = `#ff69b4ff`;
+              ctx.fillRect(i * s + o, j * s + o, s / 2, s / 2);
+              ctx.fillRect(i * s + o + s / 2, j * s + o + s / 2, s / 2, s / 2);
+
+              // paint top-right and bottom-left translucent hotpink
+              ctx.fillStyle = `#ff69b4af`;
+              ctx.fillRect(i * s + o + s / 2, j * s + o, s / 2, s / 2);
+              ctx.fillRect(i * s + o, j * s + o + s / 2, s / 2, s / 2);
+            } else {
+              ctx.fillStyle = `rgba(${z[0]},${z[1]},${z[2]},${z[3]})`;
+              ctx.fillRect(i * s + o, j * s + o, s, s);
+            }
 
             if (r !== " ") {
               if (selChar == r) {
@@ -302,6 +321,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
+      background: repeating-conic-gradient(#222 0% 25%, transparent 0% 50%) 50% / 20px 20px;
 
       #icon {
         aspect-ratio: 1/1;
