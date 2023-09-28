@@ -21,7 +21,7 @@
       return;
     }
     iconicData.update(x => {
-      x.modules[$selectedModule].parts = x.modules[i].parts;
+      x.modules[$selectedModule].parts = [...x.modules[i].parts];
       x.modules[$selectedModule].raw = x.modules[i].raw;
       return x;
     });
