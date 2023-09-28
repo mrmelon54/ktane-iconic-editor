@@ -88,6 +88,11 @@
             let z = [imPix(i, j, 0), imPix(i, j, 1), imPix(i, j, 2), imPix(i, j, 3)];
             let r = moduleRaw[j * 32 + i];
 
+            // paint top-right and bottom-left background grid
+            ctx.fillStyle = `#222`;
+            ctx.fillRect(i * s + o + s / 2, j * s + o, s / 2, s / 2);
+            ctx.fillRect(i * s + o, j * s + o + s / 2, s / 2, s / 2);
+
             // if the pixel is fully transparent
             // but the color is not #00000000 rgba(0, 0, 0, 0)
             // then change the color to hot pink fully opaque
@@ -321,7 +326,6 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: repeating-conic-gradient(#222 0% 25%, transparent 0% 50%) 50% / 20px 20px;
 
       #icon {
         aspect-ratio: 1/1;
