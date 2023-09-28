@@ -21,11 +21,10 @@
       return;
     }
     iconicData.update(x => {
-      x.modules[i].parts = x.modules[$selectedModule].parts;
-      x.modules[i].raw = x.modules[$selectedModule].raw;
+      x.modules[$selectedModule].parts = x.modules[i].parts;
+      x.modules[$selectedModule].raw = x.modules[i].raw;
       return x;
     });
-    $selectedModule = i;
     close();
   }
 </script>
@@ -37,7 +36,7 @@
       <button class="cancel-button" on:click={() => close()}>&times;</button>
     </div>
     <div class="dialog-content">
-      <p>Search for a module and press enter to copy the parts and text to it</p>
+      <p>Search for a module and press enter to copy the parts from that to the currently viewed module</p>
       <div>
         <ModuleSearchBox moduleList={filteredModuleList} on:select={chooseModule} />
       </div>
