@@ -14,7 +14,10 @@
   let renameMode: {part: iconicDataPart; i: number} | null = null;
   let renameInput: HTMLInputElement;
 
-  $: if (renameInput) renameInput.focus();
+  $: if (renameInput) {
+    renameInput.focus();
+    renameInput.select();
+  }
 
   function renamePart(value: string, part: iconicDataPart, i: number) {
     const module = $iconicData.modules[$selectedModule];
@@ -30,7 +33,7 @@
     $iconicData = $iconicData;
   }
 
-  function renamePartKeyPress(e) {
+  function renamePartKeyPress(e: KeyboardEvent & { currentTarget: EventTarget & HTMLInputElement; }) {
     if (renameMode && e.which === 27) renameMode = null;
   }
 
@@ -39,7 +42,7 @@
     renameMode = null;
   }
 
-  function selectPartKeyPress(e) {
+  function selectPartKeyPress(e: { key: string; }) {
     if (renameMode != null) return;
     let n = getPartByChar(e.key);
     if (n == -1) return;
