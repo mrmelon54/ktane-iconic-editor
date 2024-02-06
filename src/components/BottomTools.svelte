@@ -142,11 +142,11 @@
     <!--<button class="btn" on:click={() => (showReorderDialog = true)}><img src={reorderIcon} alt="Reorder" title="Reorder" /></button>-->
     <button class="btn" on:click={() => (showCopyDialog = true)}><img src={copyIcon} alt="Copy Parts and Text" title="Copy Parts and Text" /></button>
     <button class="btn" on:click={() => testModuleIcons()}><img src={testIcon} alt="Test Module Icons" title="Test Module Icons" /></button>
+    <button class="btn" on:click={lewayAction}><img src={lewayIcon} alt="Leway" title="Leway" /></button>
   </div>
   <div class="tool-row">
     <button class="btn" on:click={saveAction}><img src={saveIcon} alt="Save" title="Save" /></button>
     <div class="full">{unsavedCount} unsaved</div>
-    <button class="btn" on:click={lewayAction}><img src={lewayIcon} alt="Leway" title="Leway" /></button>
     <button class="btn" on:click={backAction}><img src={backIcon} alt="Back" title="Back" /></button>
   </div>
   {#if showSearchDialog}
