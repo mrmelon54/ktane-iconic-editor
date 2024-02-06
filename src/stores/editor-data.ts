@@ -96,7 +96,7 @@ export function getPartByChar(a: string): number {
 }
 
 export function getPartByCharWithSpace(a: string): number {
-  return (" " + partChars).indexOf(a);
+  return (" " + partChars).indexOf(a) - 1;
 }
 
 export function getPartColor(n: number): string {
