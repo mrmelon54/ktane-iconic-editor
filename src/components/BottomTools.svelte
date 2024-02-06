@@ -8,8 +8,9 @@
   import saveIcon from "~/assets/icons/save.png";
   import backIcon from "~/assets/icons/back.png";
   import testIcon from "~/assets/icons/test.png";
+  import lewayIcon from "~/assets/icons/leway.png";
   import FileSaver from "file-saver";
-  import {exportIconicData, getUnsavedCount, iconicData, resetIconicUnsaved} from "~/stores/iconic-data";
+  import {exportIconicData, getUnsavedCount, iconicData, resetIconicUnsaved, type iconicDataModule} from "~/stores/iconic-data";
   import {selectedModule} from "~/stores/editor-data";
   import AddDialog from "./AddDialog.svelte";
   import CopyDialog from "./CopyDialog.svelte";
@@ -18,6 +19,7 @@
   import {getModuleById} from "~/stores/ktane-json-raw";
   import InvalidIconErrorDialog from "./InvalidIconErrorDialog.svelte";
   import {filterInvalidIcons} from "~/stores/ktane-icons-raw";
+  import {calculateLeway} from "~/utils/leway";
 
   let showSearchDialog: boolean = false;
   let showAddDialog: boolean = false;
@@ -51,6 +53,13 @@
     if (key == null) return;
     iconicData.update(x => {
       x.modules[$selectedModule].key = key;
+      return x;
+    });
+  }
+
+  function lewayAction() {
+    iconicData.update(x => {
+      calculateLeway(x.modules[$selectedModule]);
       return x;
     });
   }
@@ -137,6 +146,7 @@
   <div class="tool-row">
     <button class="btn" on:click={saveAction}><img src={saveIcon} alt="Save" title="Save" /></button>
     <div class="full">{unsavedCount} unsaved</div>
+    <button class="btn" on:click={lewayAction}><img src={lewayIcon} alt="Leway" title="Leway" /></button>
     <button class="btn" on:click={backAction}><img src={backIcon} alt="Back" title="Back" /></button>
   </div>
   {#if showSearchDialog}
