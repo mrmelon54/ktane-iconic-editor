@@ -7,7 +7,7 @@ export function getRawModuleData(): jsonRawType {
 export function loadRawModuleData(): Promise<void> {
   return new Promise<void>((res, rej) => {
     let xmlHttp = new XMLHttpRequest();
-    xmlHttp.open("GET", "https://ktane-mirror.mrmelon54.com/json/raw");
+    xmlHttp.open("GET", "https://ktane.mrmelon54.com/json/raw");
     xmlHttp.onload = () => {
       let j = JSON.parse(xmlHttp.responseText) as jsonRawType;
       let km = j.KtaneModules;
