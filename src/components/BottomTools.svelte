@@ -7,7 +7,6 @@
   import copyIcon from "~/assets/icons/copyparts.png";
   import saveIcon from "~/assets/icons/save.png";
   import backIcon from "~/assets/icons/back.png";
-  import testIcon from "~/assets/icons/test.png";
   import lewayIcon from "~/assets/icons/leway.png";
   import FileSaver from "file-saver";
   import {exportIconicData, getUnsavedCount, iconicData, resetIconicUnsaved, type iconicDataModule} from "~/stores/iconic-data";
@@ -20,12 +19,17 @@
   import InvalidIconErrorDialog from "./InvalidIconErrorDialog.svelte";
   import {filterInvalidIcons} from "~/stores/ktane-icons-raw";
   import {calculateLeway} from "~/utils/leway";
+  import InfoDialog from "./InfoDialog.svelte";
 
   let showSearchDialog: boolean = false;
   let showAddDialog: boolean = false;
   let showReorderDialog: boolean = false;
   let showCopyDialog: boolean = false;
   let showIconErrorDialog: boolean = false;
+  let showInfoDialog: boolean = false;
+
+  let infoTitle: string = "";
+  let infoBody: string[] = [];
 
   let invalidIcons: {name: string; found: boolean; caseIssue: boolean}[];
 
@@ -97,13 +101,42 @@
     }
   }
 
+  $: invalidIcons = filterInvalidIcons($iconicData.modules);
+
   function testModuleIcons() {
-    let missingFiles = filterInvalidIcons($iconicData.modules);
+    let missingFiles = invalidIcons;
     if (missingFiles.length === 0) {
       alert("There are no missing or invalid icons");
     } else {
-      invalidIcons = missingFiles;
       showIconErrorDialog = true;
+    }
+  }
+
+  let unknownModules: iconicDataModule[] = [];
+  $: unknownModules = $iconicData.modules.filter(x => getModuleById(x.key) == null);
+
+  enum InfoType {
+    Modules,
+    UnknownModules,
+  }
+
+  function showInfo(key: InfoType) {
+    switch (key) {
+      case InfoType.Modules:
+        infoTitle = "Modules";
+        infoBody = $iconicData.modules.map(x => x.key);
+        showInfoDialog = true;
+        break;
+      case InfoType.UnknownModules:
+        infoTitle = "Unknown Modules";
+        infoBody = unknownModules.map(x => x.key);
+        showInfoDialog = true;
+        break;
+      default:
+        infoTitle = "";
+        infoBody = "";
+        showInfoDialog = false;
+        break;
     }
   }
 </script>
@@ -112,13 +145,13 @@
 
 <div class="tools">
   <div class="tool-row">
-    <div class="full">Module count: {$iconicData.modules.length}</div>
+    <button class="full" on:click={() => showInfo(InfoType.Modules)}>Module count: {$iconicData.modules.length}</button>
   </div>
   <div class="tool-row">
-    <div class="full">Unknown module count: {$iconicData.modules.filter(x => getModuleById(x.key) == null).length}</div>
+    <button class="full" on:click={() => showInfo(InfoType.UnknownModules)}>Unknown module count: {unknownModules.length}</button>
   </div>
   <div class="tool-row">
-    <div class="full">Invalid icon count: {filterInvalidIcons($iconicData.modules).length}</div>
+    <button class="full" on:click={() => testModuleIcons()}>Invalid icon count: {invalidIcons.length}</button>
   </div>
   <div class="tool-row">
     {#if $iconicData.modules.length === 0}
@@ -141,7 +174,6 @@
     <button class="btn" on:click={renameAction}><img src={renameIcon} alt="Rename" title="Rename" /></button>
     <!--<button class="btn" on:click={() => (showReorderDialog = true)}><img src={reorderIcon} alt="Reorder" title="Reorder" /></button>-->
     <button class="btn" on:click={() => (showCopyDialog = true)}><img src={copyIcon} alt="Copy Parts and Text" title="Copy Parts and Text" /></button>
-    <button class="btn" on:click={() => testModuleIcons()}><img src={testIcon} alt="Test Module Icons" title="Test Module Icons" /></button>
     <button class="btn" on:click={lewayAction}><img src={lewayIcon} alt="Leway" title="Leway" /></button>
   </div>
   <div class="tool-row">
@@ -163,6 +195,9 @@
   {/if}
   {#if showIconErrorDialog}
     <InvalidIconErrorDialog close={() => (showIconErrorDialog = false)} {invalidIcons} />
+  {/if}
+  {#if showInfoDialog}
+    <InfoDialog close={() => (showInfoDialog = false)} title={infoTitle} {infoBody} />
   {/if}
 </div>
 
