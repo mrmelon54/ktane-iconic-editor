@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { run, stopPropagation } from 'svelte/legacy';
+  import {onMount} from "svelte";
 
-  import {onMount} from "svelte/internal";
   import {getCurrentModuleString, getIconUrl, getPartChar, getPartColorByChar, hoveredChar, selectedChar, selectedModule} from "~/stores/editor-data";
   import {iconicData, type iconicDataPart, type iconicDataType} from "~/stores/iconic-data";
   import {getModuleById} from "~/stores/ktane-json-raw";
@@ -36,28 +35,29 @@
     imData = null;
   });
 
-  run(() => {
-    ((x: iconicDataType, y: number) => {
-      moduleIcon.crossOrigin = "anonymous";
-      let module = x.modules[y];
-      if (module == undefined) {
-        moduleIcon.src = getIconUrl("../Extra Icons/Misc/blank");
-        return;
-      }
-      let modMeta = getModuleById(module.key);
-      if (modMeta == null) {
-        moduleIcon.src = getIconUrl("../Extra Icons/Misc/blank");
-        return;
-      }
-      moduleIcon.src = getIconUrl(modMeta.FileName || modMeta.Name || modMeta.ModuleID);
+  $effect(() => {
+    const x: iconicDataType = $iconicData;
+    const y: number = $selectedModule;
 
-      parts.clear();
-      let loadParts = x.modules[y].parts;
-      for (let i = 0; i < loadParts.length; i++) {
-        let w = loadParts[i];
-        parts.set(getPartChar(i), w);
-      }
-    })($iconicData, $selectedModule);
+    moduleIcon.crossOrigin = "anonymous";
+    let module = x.modules[y];
+    if (module == undefined) {
+      moduleIcon.src = getIconUrl("../Extra Icons/Misc/blank");
+      return;
+    }
+    let modMeta = getModuleById(module.key);
+    if (modMeta == null) {
+      moduleIcon.src = getIconUrl("../Extra Icons/Misc/blank");
+      return;
+    }
+    moduleIcon.src = getIconUrl(modMeta.FileName || modMeta.Name || modMeta.ModuleID);
+
+    parts.clear();
+    let loadParts = x.modules[y].parts;
+    for (let i = 0; i < loadParts.length; i++) {
+      let w = loadParts[i];
+      parts.set(getPartChar(i), w);
+    }
   });
 
   function resizeCanvas() {
@@ -233,6 +233,8 @@
   }
 
   function canvasKeyChange(ev) {
+    ev.preventDefault();
+    ev.stopPropagation();
     if (ev.ctrlKey) {
       mouseSel = true;
       [selX, selY] = [mouseX, mouseY];
@@ -313,9 +315,9 @@
       onmouseup={canvasMouseUp}
       onmouseleave={canvasMouseLeave}
       oncontextmenu={ev => ev.preventDefault()}
-      onkeydown={stopPropagation(canvasKeyChange)}
-      onkeyup={stopPropagation(canvasKeyChange)}
-></canvas>
+      onkeydown={canvasKeyChange}
+      onkeyup={canvasKeyChange}
+    ></canvas>
     <canvas bind:this={moduleCanvas} id="module-icon-hidden"></canvas>
   </div>
 </div>
