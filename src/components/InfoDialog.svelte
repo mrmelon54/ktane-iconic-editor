@@ -26,7 +26,7 @@
 </div>
 
 <style lang="scss">
-  @import "../assets/dialog.scss";
+  @use "../assets/dialog.scss";
 
   .dialog-content {
     overflow-y: scroll !important;

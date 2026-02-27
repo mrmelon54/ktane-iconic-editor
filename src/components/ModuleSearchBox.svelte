@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { run, stopPropagation } from 'svelte/legacy';
-
   import {createEventDispatcher, onMount} from "svelte";
   import type {jsonRawModule} from "~/stores/ktane-json-raw";
+  import TopTools from "./TopTools.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -10,15 +9,18 @@
     moduleList?: Array<jsonRawModule>;
   }
 
-  let { moduleList = new Array() }: Props = $props();
+  let {moduleList = new Array()}: Props = $props();
 
   let inputValue: string = $state("");
-  let filteredList: Array<jsonRawModule> = $state();
+  let filteredList: Array<jsonRawModule> = $derived(filterModuleList(inputValue, moduleList));
   let selectedModule: number = $state(0);
+  $effect(() => {
+    selectedModule = fixSelection(selectedModule, filteredList);
+  });
   let scrollingFilterList: HTMLDivElement = $state();
 
-
   function inputKeyPress(event: KeyboardEvent & {currentTarget: EventTarget & HTMLInputElement}) {
+    event.stopPropagation();
     switch (event.code) {
       case "Enter":
         event.preventDefault();
@@ -36,7 +38,7 @@
     }
   }
 
-  function filterModuleList(v: string): Array<jsonRawModule> {
+  function filterModuleList(v: string, moduleList: Array<jsonRawModule>): Array<jsonRawModule> {
     let m = moduleList
       .filter(
         x =>
@@ -82,9 +84,9 @@
     return (a || "").localeCompare(b || "", "en", {sensitivity: "base"});
   }
 
-  function fixSelection(sel) {
+  function fixSelection<T>(sel: number, list: Array<T>) {
     if (sel < 0) sel = 0;
-    if (sel >= filteredList.length) sel = filteredList.length - 1;
+    if (sel >= list.length) sel = list.length - 1;
     return sel;
   }
 
@@ -104,26 +106,16 @@
   onMount(() => {
     inputField.focus();
   });
-  run(() => {
-    moduleList, (filteredList = filterModuleList(inputValue));
-  });
-  run(() => {
-    filteredList, (selectedModule = fixSelection(selectedModule));
-  });
-  run(() => {
-    filteredList, selectedModule, scrollToSelection();
+  $effect(() => {
+    filteredList;
+    selectedModule;
+    scrollToSelection();
   });
 </script>
 
 <div class="search-box">
   <div class="input-wrapper">
-    <input
-      class="add-input"
-      bind:this={inputField}
-      bind:value={inputValue}
-      onkeypress={stopPropagation(inputKeyPress)}
-      onkeydown={stopPropagation(inputKeyPress)}
-    />
+    <input class="add-input" bind:this={inputField} bind:value={inputValue} onkeypress={inputKeyPress} onkeydown={inputKeyPress} />
   </div>
   <div class="scrolling-filter" bind:this={scrollingFilterList}>
     {#each filteredList as filterItem, i (filterItem.ModuleID)}

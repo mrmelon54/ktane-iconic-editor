@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run, stopPropagation } from 'svelte/legacy';
-
   import leftIcon from "~/assets/icons/left.png";
   import rightIcon from "~/assets/icons/right.png";
   import searchIcon from "~/assets/icons/search.png";
@@ -93,6 +91,8 @@
   });
 
   function pressArrowKey(event: KeyboardEvent & {currentTarget: EventTarget & Window}) {
+    event.preventDefault();
+    event.stopPropagation();
     switch (event.key) {
       case "ArrowLeft":
         leftAction();
@@ -112,10 +112,7 @@
     }
   }
 
-  let unknownModules: iconicDataModule[] = $state([]);
-  run(() => {
-    unknownModules = $iconicData.modules.filter(x => getModuleById(x.key) == null);
-  });
+  let unknownModules: iconicDataModule[] = $derived($iconicData.modules.filter(x => getModuleById(x.key) == null));
 
   enum InfoType {
     Modules,
@@ -143,7 +140,7 @@
   }
 </script>
 
-<svelte:window onkeydown={stopPropagation(pressArrowKey)} />
+<svelte:window onkeydown={pressArrowKey} />
 
 <div class="tools">
   <div class="tool-row">

@@ -51,7 +51,7 @@
 </div>
 
 <style lang="scss">
-  @import "../assets/dialog.scss";
+  @use "../assets/dialog.scss";
 
   .module-key {
     user-select: none;
