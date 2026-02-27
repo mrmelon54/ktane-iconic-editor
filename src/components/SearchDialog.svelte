@@ -4,15 +4,17 @@
   import {selectedModule} from "~/stores/editor-data";
   import {getRawModuleData, type jsonRawModule} from "~/stores/ktane-json-raw";
 
-  export let close: () => void;
+  interface Props {
+    close: () => void;
+  }
+
+  let { close }: Props = $props();
 
   let rawModuleData = getRawModuleData();
 
-  let ktaneIconicModules: Set<string>;
-  $: ktaneIconicModules = new Set($iconicData.modules.map(x => x.key));
+  let ktaneIconicModules: Set<string> = $derived(new Set($iconicData.modules.map(x => x.key)));
 
-  let filteredModuleList: jsonRawModule[];
-  $: filteredModuleList = rawModuleData.KtaneModules.filter(x => ktaneIconicModules.has(x.ModuleID));
+  let filteredModuleList: jsonRawModule[] = $derived(rawModuleData.KtaneModules.filter(x => ktaneIconicModules.has(x.ModuleID)));
 
   function chooseModule(e: CustomEvent<any>): void {
     let i = $iconicData.modules.findIndex(x => x.key == e.detail.ModuleID);
@@ -29,7 +31,7 @@
   <div class="dialog">
     <div class="dialog-header">
       <h2>Search</h2>
-      <button class="cancel-button" on:click={() => close()}>&times;</button>
+      <button class="cancel-button" onclick={() => close()}>&times;</button>
     </div>
     <div class="dialog-content">
       <p>Search for a module and press enter to jump to the module.</p>

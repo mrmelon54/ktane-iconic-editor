@@ -1,15 +1,19 @@
 <script lang="ts">
-  export let close: () => void;
 
-  export let title: string;
-  export let infoBody: string[];
+  interface Props {
+    close: () => void;
+    title: string;
+    infoBody: string[];
+  }
+
+  let { close, title, infoBody }: Props = $props();
 </script>
 
 <div class="dialog-outer">
   <div class="dialog">
     <div class="dialog-header">
       <h2>{title}</h2>
-      <button class="cancel-button" on:click={() => close()}>&times;</button>
+      <button class="cancel-button" onclick={() => close()}>&times;</button>
     </div>
     <div class="dialog-content">
       <ul>

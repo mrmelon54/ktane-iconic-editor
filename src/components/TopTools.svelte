@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run, stopPropagation, preventDefault } from 'svelte/legacy';
+
   import {
     containsMissingPart,
     getCurrentModuleString,
@@ -11,13 +13,15 @@
   import {iconicData, type iconicDataModule, type iconicDataPart} from "~/stores/iconic-data";
   import DynamicPartColor from "./DynamicPartColor.svelte";
 
-  let renameMode: {part: iconicDataPart; i: number} | null = null;
-  let renameInput: HTMLInputElement;
+  let renameMode: {part: iconicDataPart; i: number} | null = $state(null);
+  let renameInput: HTMLInputElement = $state();
 
-  $: if (renameInput) {
-    renameInput.focus();
-    renameInput.select();
-  }
+  run(() => {
+    if (renameInput) {
+      renameInput.focus();
+      renameInput.select();
+    }
+  });
 
   function renamePart(value: string, part: iconicDataPart, i: number) {
     const module = $iconicData.modules[$selectedModule];
@@ -82,7 +86,7 @@
   }
 </script>
 
-<svelte:window on:keypress|stopPropagation={selectPartKeyPress} />
+<svelte:window onkeypress={stopPropagation(selectPartKeyPress)} />
 
 <div class="tools">
   {#if $iconicData.modules.length === 0}
@@ -100,9 +104,9 @@
         class="part-row"
         class:hovered={$hoveredChar === partChar}
         class:selected={$selectedChar === partChar}
-        on:mouseenter={() => hoveredChar.set(partChar)}
-        on:mouseleave={() => hoveredChar.set("")}
-        on:click={() => (renameMode = {part, i})}
+        onmouseenter={() => hoveredChar.set(partChar)}
+        onmouseleave={() => hoveredChar.set("")}
+        onclick={() => (renameMode = {part, i})}
       >
         <div class="part-color">
           <DynamicPartColor moduleIndex={$selectedModule} partIndex={i} />
@@ -114,18 +118,18 @@
               type="text"
               value={part.name}
               bind:this={renameInput}
-              on:blur={() => renamePartBlur()}
-              on:keydown|stopPropagation={e => renamePartKeyPress(e)}
+              onblur={() => renamePartBlur()}
+              onkeydown={stopPropagation(e => renamePartKeyPress(e))}
             />
           </div>
         {:else}
           <div class="part-name">{part.name}</div>
-          <button class="part-delete" on:click|preventDefault|stopPropagation={() => deletePart(module, part, i)} />
+          <button class="part-delete" onclick={stopPropagation(preventDefault(() => deletePart(module, part, i)))}></button>
         {/if}
       </button>
     {/each}
-    <button class="part-row" on:click={() => addPart(module)}>
-      <div class="part-color" />
+    <button class="part-row" onclick={() => addPart(module)}>
+      <div class="part-color"></div>
       <div class="part-char">+</div>
     </button>
     {#if containsMissingPart(module)}

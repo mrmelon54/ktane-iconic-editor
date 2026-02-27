@@ -22,7 +22,7 @@
     };
   }
 
-  let dropArea: HTMLDivElement;
+  let dropArea: HTMLDivElement = $state();
 
   function dragEnter(e: DragEvent) {
     if (e.dataTransfer.items[0].kind === "file") {
@@ -62,8 +62,8 @@
   }
 </script>
 
-<div id="content" on:dragenter={dragEnter} on:dragover={dragEnter} on:dragleave={dragLeave} on:drop={handleDrop} bind:this={dropArea}>
-  <div id="left-tools" />
+<div id="content" ondragenter={dragEnter} ondragover={dragEnter} ondragleave={dragLeave} ondrop={handleDrop} bind:this={dropArea}>
+  <div id="left-tools"></div>
   <div id="icon-view">
     <IconView />
     <div id="dragDropOverlay">
@@ -81,7 +81,7 @@
 </div>
 
 <!-- file upload -->
-<input style="display:none" type="file" accept=".json" on:change={() => onFileSelected(this.files)} />
+<input style="display:none" type="file" accept=".json" onchange={() => onFileSelected(this.files)} />
 
 <style lang="scss">
   #content {

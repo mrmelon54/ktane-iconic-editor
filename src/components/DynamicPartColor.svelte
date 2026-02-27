@@ -1,12 +1,17 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import {getPartColor, updateOnLoad} from "~/stores/editor-data";
   import {iconicData} from "~/stores/iconic-data";
 
-  export let moduleIndex: number;
-  export let partIndex: number;
+  interface Props {
+    moduleIndex: number;
+    partIndex: number;
+  }
 
-  let c = getColor();
-  $: $updateOnLoad, moduleIndex, partIndex, (c = getColor());
+  let { moduleIndex, partIndex }: Props = $props();
+
+  let c = $state(getColor());
 
   function getColor(): string {
     let a = $iconicData.modules[moduleIndex].parts[partIndex].color;
@@ -18,9 +23,12 @@
     $iconicData.modules[moduleIndex].parts[partIndex].color = c;
     $iconicData = $iconicData;
   }
+  run(() => {
+    $updateOnLoad, moduleIndex, partIndex, (c = getColor());
+  });
 </script>
 
-<input type="color" bind:value={c} on:change={() => changeInput()} />
+<input type="color" bind:value={c} onchange={() => changeInput()} />
 
 <style lang="scss">
   input[type="color"] {

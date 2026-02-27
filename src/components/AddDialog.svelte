@@ -4,17 +4,20 @@
   import {iconicData, sortIconicModules} from "~/stores/iconic-data";
   import {KeyMap} from "~/utils/key-map";
 
-  export let close: () => void;
+  interface Props {
+    close: () => void;
+  }
+
+  let { close }: Props = $props();
 
   let rawModuleData = getRawModuleData();
-  let modulesToAdd: Set<jsonRawModule> = new Set();
-  let usedModules: KeyMap<string> = new KeyMap();
+  let modulesToAdd: Set<jsonRawModule> = $state(new Set());
+  let usedModules: KeyMap<string> = $state(new KeyMap());
 
-  let ktaneIconicModules: KeyMap<string>;
-  $: ktaneIconicModules = new KeyMap($iconicData.modules.map(x => x.key));
+  let ktaneIconicModules: KeyMap<string> = $derived(new KeyMap($iconicData.modules.map(x => x.key)));
+  
 
-  let filteredModuleList: jsonRawModule[];
-  $: filteredModuleList = rawModuleData.KtaneModules.filter(x => !ktaneIconicModules.has(x.ModuleID) && !usedModules.has(x.ModuleID));
+  let filteredModuleList: jsonRawModule[] = $derived(rawModuleData.KtaneModules.filter(x => !ktaneIconicModules.has(x.ModuleID) && !usedModules.has(x.ModuleID)));
 
   function selectedModule(e: CustomEvent<any>): void {
     addSingleModule(e.detail);
@@ -56,7 +59,7 @@
   <div class="dialog">
     <div class="dialog-header">
       <h2>Add Modules</h2>
-      <button class="cancel-button" on:click={() => close()}>&times;</button>
+      <button class="cancel-button" onclick={() => close()}>&times;</button>
     </div>
     <div class="dialog-content">
       <div class="module-list-wrapper">
@@ -70,8 +73,8 @@
         <ModuleSearchBox moduleList={filteredModuleList} on:select={selectedModule} />
       </div>
       <div class="submit-wrapper">
-        <button class="submit-button" on:click={addModules}>Add Modules</button>
-        <button class="submit-button" on:click={selectAll}>Select All Remaining Modules</button>
+        <button class="submit-button" onclick={addModules}>Add Modules</button>
+        <button class="submit-button" onclick={selectAll}>Select All Remaining Modules</button>
       </div>
     </div>
     <div id="dragDropOverlay">

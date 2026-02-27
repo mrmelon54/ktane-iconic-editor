@@ -1,19 +1,22 @@
 <script lang="ts">
+  import { run, stopPropagation } from 'svelte/legacy';
+
   import {createEventDispatcher, onMount} from "svelte";
   import type {jsonRawModule} from "~/stores/ktane-json-raw";
 
   const dispatch = createEventDispatcher();
 
-  export let moduleList: Array<jsonRawModule> = new Array();
+  interface Props {
+    moduleList?: Array<jsonRawModule>;
+  }
 
-  let inputValue: string = "";
-  let filteredList: Array<jsonRawModule>;
-  let selectedModule: number = 0;
-  let scrollingFilterList: HTMLDivElement;
+  let { moduleList = new Array() }: Props = $props();
 
-  $: moduleList, (filteredList = filterModuleList(inputValue));
-  $: filteredList, (selectedModule = fixSelection(selectedModule));
-  $: filteredList, selectedModule, scrollToSelection();
+  let inputValue: string = $state("");
+  let filteredList: Array<jsonRawModule> = $state();
+  let selectedModule: number = $state(0);
+  let scrollingFilterList: HTMLDivElement = $state();
+
 
   function inputKeyPress(event: KeyboardEvent & {currentTarget: EventTarget & HTMLInputElement}) {
     switch (event.code) {
@@ -96,10 +99,19 @@
     scrollingFilterList.scrollTop = y;
   }
 
-  let inputField: HTMLInputElement;
+  let inputField: HTMLInputElement = $state();
 
   onMount(() => {
     inputField.focus();
+  });
+  run(() => {
+    moduleList, (filteredList = filterModuleList(inputValue));
+  });
+  run(() => {
+    filteredList, (selectedModule = fixSelection(selectedModule));
+  });
+  run(() => {
+    filteredList, selectedModule, scrollToSelection();
   });
 </script>
 
@@ -109,8 +121,8 @@
       class="add-input"
       bind:this={inputField}
       bind:value={inputValue}
-      on:keypress|stopPropagation={inputKeyPress}
-      on:keydown|stopPropagation={inputKeyPress}
+      onkeypress={stopPropagation(inputKeyPress)}
+      onkeydown={stopPropagation(inputKeyPress)}
     />
   </div>
   <div class="scrolling-filter" bind:this={scrollingFilterList}>
