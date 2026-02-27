@@ -1,16 +1,24 @@
 <script lang="ts">
-  export let close: () => void;
+  import { run } from 'svelte/legacy';
 
-  export let invalidIcons: {name: string; found: boolean; caseIssue: boolean}[];
 
-  $: console.log(invalidIcons);
+  interface Props {
+    close: () => void;
+    invalidIcons: {name: string; found: boolean; caseIssue: boolean}[];
+  }
+
+  let { close, invalidIcons }: Props = $props();
+
+  run(() => {
+    console.log(invalidIcons);
+  });
 </script>
 
 <div class="dialog-outer">
   <div class="dialog">
     <div class="dialog-header">
       <h2>Invalid Icon Error</h2>
-      <button class="cancel-button" on:click={() => close()}>&times;</button>
+      <button class="cancel-button" onclick={() => close()}>&times;</button>
     </div>
     <div class="dialog-content">
       <p>Invalid module icons are listed below:</p>

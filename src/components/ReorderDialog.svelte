@@ -3,11 +3,15 @@
   import {dndzone} from "svelte-dnd-action";
   import {onMount} from "svelte";
 
-  export let close: () => void;
+  interface Props {
+    close: () => void;
+  }
+
+  let { close }: Props = $props();
 
   type moduleWithId = iconicDataModule & {id: number};
 
-  let items: Array<moduleWithId> = [];
+  let items: Array<moduleWithId> = $state([]);
 
   function handleConsider(e) {
     items = e.detail.items;
@@ -33,11 +37,11 @@
   <div class="dialog">
     <div class="dialog-header">
       <h2>Reorder Modules</h2>
-      <button class="cancel-button" on:click={() => close()}>&times;</button>
+      <button class="cancel-button" onclick={() => close()}>&times;</button>
     </div>
     <div class="dialog-content">
       <p>Drag modules to reorder</p>
-      <div id="dnd" use:dndzone={{items: items}} on:consider={handleConsider} on:finalize={handleFinalize}>
+      <div id="dnd" use:dndzone={{items: items}} onconsider={handleConsider} onfinalize={handleFinalize}>
         {#each items as item (item.id)}
           <div class="module-key">{item.key}</div>
         {/each}

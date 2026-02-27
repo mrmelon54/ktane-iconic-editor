@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run, stopPropagation } from 'svelte/legacy';
+
   import leftIcon from "~/assets/icons/left.png";
   import rightIcon from "~/assets/icons/right.png";
   import searchIcon from "~/assets/icons/search.png";
@@ -21,17 +23,17 @@
   import {calculateLeway} from "~/utils/leway";
   import InfoDialog from "./InfoDialog.svelte";
 
-  let showSearchDialog: boolean = false;
-  let showAddDialog: boolean = false;
-  let showReorderDialog: boolean = false;
-  let showCopyDialog: boolean = false;
-  let showIconErrorDialog: boolean = false;
-  let showInfoDialog: boolean = false;
+  let showSearchDialog: boolean = $state(false);
+  let showAddDialog: boolean = $state(false);
+  let showReorderDialog: boolean = $state(false);
+  let showCopyDialog: boolean = $state(false);
+  let showIconErrorDialog: boolean = $state(false);
+  let showInfoDialog: boolean = $state(false);
 
-  let infoTitle: string = "";
-  let infoBody: string[] = [];
+  let infoTitle: string = $state("");
+  let infoBody: string[] = $state([]);
 
-  let invalidIcons: {name: string; found: boolean; caseIssue: boolean}[];
+  let invalidIcons: {name: string; found: boolean; caseIssue: boolean}[] = $derived(filterInvalidIcons($iconicData.modules));
 
   function saveAction() {
     // JavaScript is still difficult in 2023
@@ -85,7 +87,7 @@
     alert("No more unsaved modules found");
   }
 
-  let unsavedCount = 0;
+  let unsavedCount = $state(0);
   iconicData.subscribe(_ => {
     unsavedCount = getUnsavedCount();
   });
@@ -101,8 +103,6 @@
     }
   }
 
-  $: invalidIcons = filterInvalidIcons($iconicData.modules);
-
   function testModuleIcons() {
     let missingFiles = invalidIcons;
     if (missingFiles.length === 0) {
@@ -112,8 +112,10 @@
     }
   }
 
-  let unknownModules: iconicDataModule[] = [];
-  $: unknownModules = $iconicData.modules.filter(x => getModuleById(x.key) == null);
+  let unknownModules: iconicDataModule[] = $state([]);
+  run(() => {
+    unknownModules = $iconicData.modules.filter(x => getModuleById(x.key) == null);
+  });
 
   enum InfoType {
     Modules,
@@ -141,45 +143,45 @@
   }
 </script>
 
-<svelte:window on:keydown|stopPropagation={pressArrowKey} />
+<svelte:window onkeydown={stopPropagation(pressArrowKey)} />
 
 <div class="tools">
   <div class="tool-row">
-    <button class="full" on:click={() => showInfo(InfoType.Modules)}>Module count: {$iconicData.modules.length}</button>
+    <button class="full" onclick={() => showInfo(InfoType.Modules)}>Module count: {$iconicData.modules.length}</button>
   </div>
   <div class="tool-row">
-    <button class="full" on:click={() => showInfo(InfoType.UnknownModules)}>Unknown module count: {unknownModules.length}</button>
+    <button class="full" onclick={() => showInfo(InfoType.UnknownModules)}>Unknown module count: {unknownModules.length}</button>
   </div>
   <div class="tool-row">
-    <button class="full" on:click={() => testModuleIcons()}>Invalid icon count: {invalidIcons.length}</button>
+    <button class="full" onclick={() => testModuleIcons()}>Invalid icon count: {invalidIcons.length}</button>
   </div>
   <div class="tool-row">
     {#if $iconicData.modules.length === 0}
       <div class="full">No modules to select</div>
     {:else if $selectedModule < 0 || $selectedModule >= $iconicData.modules.length}
-      <button class="btn" on:click={() => ($selectedModule = 0)}><img src={leftIcon} alt="Left" title="Left" /></button>
+      <button class="btn" onclick={() => ($selectedModule = 0)}><img src={leftIcon} alt="Left" title="Left" /></button>
       <div class="full">Invalid module selected</div>
       {selectedModule.set(0)}
     {:else}
       {@const modName = getModuleById($iconicData.modules[$selectedModule].key)?.Name || "Unknown Module"}
-      <button class="btn" on:click={leftAction}><img src={leftIcon} alt="Left" title="Left" /></button>
+      <button class="btn" onclick={leftAction}><img src={leftIcon} alt="Left" title="Left" /></button>
       <div class="full module-name" title={modName}>{modName}</div>
       <div class="module-count">({$selectedModule + 1}/{$iconicData.modules.length})</div>
-      <button class="btn" on:click={rightAction}><img src={rightIcon} alt="Right" title="Right" /></button>
+      <button class="btn" onclick={rightAction}><img src={rightIcon} alt="Right" title="Right" /></button>
     {/if}
   </div>
   <div class="tool-row">
-    <button class="btn" on:click={() => (showSearchDialog = true)}><img src={searchIcon} alt="Search" title="Search" /></button>
-    <button class="btn" on:click={() => (showAddDialog = true)}><img src={addIcon} alt="Add" title="Add" /></button>
-    <button class="btn" on:click={renameAction}><img src={renameIcon} alt="Rename" title="Rename" /></button>
+    <button class="btn" onclick={() => (showSearchDialog = true)}><img src={searchIcon} alt="Search" title="Search" /></button>
+    <button class="btn" onclick={() => (showAddDialog = true)}><img src={addIcon} alt="Add" title="Add" /></button>
+    <button class="btn" onclick={renameAction}><img src={renameIcon} alt="Rename" title="Rename" /></button>
     <!--<button class="btn" on:click={() => (showReorderDialog = true)}><img src={reorderIcon} alt="Reorder" title="Reorder" /></button>-->
-    <button class="btn" on:click={() => (showCopyDialog = true)}><img src={copyIcon} alt="Copy Parts and Text" title="Copy Parts and Text" /></button>
-    <button class="btn" on:click={lewayAction}><img src={lewayIcon} alt="Leway" title="Leway" /></button>
+    <button class="btn" onclick={() => (showCopyDialog = true)}><img src={copyIcon} alt="Copy Parts and Text" title="Copy Parts and Text" /></button>
+    <button class="btn" onclick={lewayAction}><img src={lewayIcon} alt="Leway" title="Leway" /></button>
   </div>
   <div class="tool-row">
-    <button class="btn" on:click={saveAction}><img src={saveIcon} alt="Save" title="Save" /></button>
+    <button class="btn" onclick={saveAction}><img src={saveIcon} alt="Save" title="Save" /></button>
     <div class="full">{unsavedCount} unsaved</div>
-    <button class="btn" on:click={backAction}><img src={backIcon} alt="Back" title="Back" /></button>
+    <button class="btn" onclick={backAction}><img src={backIcon} alt="Back" title="Back" /></button>
   </div>
   {#if showSearchDialog}
     <SearchDialog close={() => (showSearchDialog = false)} />

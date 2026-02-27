@@ -1,17 +1,19 @@
 <script lang="ts">
+  import { run, stopPropagation } from 'svelte/legacy';
+
   import {onMount} from "svelte/internal";
   import {getCurrentModuleString, getIconUrl, getPartChar, getPartColorByChar, hoveredChar, selectedChar, selectedModule} from "~/stores/editor-data";
   import {iconicData, type iconicDataPart, type iconicDataType} from "~/stores/iconic-data";
   import {getModuleById} from "~/stores/ktane-json-raw";
 
-  let iconWrapper: HTMLDivElement;
-  let moduleIcon: HTMLImageElement = new Image(32, 32);
-  let moduleCanvas: HTMLCanvasElement;
-  $: moduleCtx = moduleCanvas ? moduleCanvas.getContext("2d") : undefined;
-  let imData: ImageData;
-  $: imPix = (x: number, y: number, i: number) => imData.data[y * 32 * 4 + x * 4 + i];
-  let C: HTMLCanvasElement;
-  $: moduleRaw = getCurrentModuleString($iconicData, $selectedModule);
+  let iconWrapper: HTMLDivElement = $state();
+  let moduleIcon: HTMLImageElement = $state(new Image(32, 32));
+  let moduleCanvas: HTMLCanvasElement = $state();
+  let moduleCtx = $derived(moduleCanvas ? moduleCanvas.getContext("2d") : undefined);
+  let imData: ImageData = $state();
+  let imPix = $derived((x: number, y: number, i: number) => imData.data[y * 32 * 4 + x * 4 + i]);
+  let C: HTMLCanvasElement = $state();
+  let moduleRaw = $derived(getCurrentModuleString($iconicData, $selectedModule));
 
   let parts: Map<string, iconicDataPart> = new Map();
 
@@ -34,27 +36,29 @@
     imData = null;
   });
 
-  $: ((x: iconicDataType, y: number) => {
-    moduleIcon.crossOrigin = "anonymous";
-    let module = x.modules[y];
-    if (module == undefined) {
-      moduleIcon.src = getIconUrl("../Extra Icons/Misc/blank");
-      return;
-    }
-    let modMeta = getModuleById(module.key);
-    if (modMeta == null) {
-      moduleIcon.src = getIconUrl("../Extra Icons/Misc/blank");
-      return;
-    }
-    moduleIcon.src = getIconUrl(modMeta.FileName || modMeta.Name || modMeta.ModuleID);
+  run(() => {
+    ((x: iconicDataType, y: number) => {
+      moduleIcon.crossOrigin = "anonymous";
+      let module = x.modules[y];
+      if (module == undefined) {
+        moduleIcon.src = getIconUrl("../Extra Icons/Misc/blank");
+        return;
+      }
+      let modMeta = getModuleById(module.key);
+      if (modMeta == null) {
+        moduleIcon.src = getIconUrl("../Extra Icons/Misc/blank");
+        return;
+      }
+      moduleIcon.src = getIconUrl(modMeta.FileName || modMeta.Name || modMeta.ModuleID);
 
-    parts.clear();
-    let loadParts = x.modules[y].parts;
-    for (let i = 0; i < loadParts.length; i++) {
-      let w = loadParts[i];
-      parts.set(getPartChar(i), w);
-    }
-  })($iconicData, $selectedModule);
+      parts.clear();
+      let loadParts = x.modules[y].parts;
+      for (let i = 0; i < loadParts.length; i++) {
+        let w = loadParts[i];
+        parts.set(getPartChar(i), w);
+      }
+    })($iconicData, $selectedModule);
+  });
 
   function resizeCanvas() {
     C.style.width = "0";
@@ -297,22 +301,22 @@
   }
 </script>
 
-<svelte:window on:resize={resizeCanvas} />
+<svelte:window onresize={resizeCanvas} />
 
 <div id="icon-wrapper">
   <div id="icon-size" bind:this={iconWrapper}>
     <canvas
       bind:this={C}
       id="icon"
-      on:mousemove={canvasMouseMove}
-      on:mousedown={canvasMouseDown}
-      on:mouseup={canvasMouseUp}
-      on:mouseleave={canvasMouseLeave}
-      on:contextmenu={ev => ev.preventDefault()}
-      on:keydown|stopPropagation={canvasKeyChange}
-      on:keyup|stopPropagation={canvasKeyChange}
-    />
-    <canvas bind:this={moduleCanvas} id="module-icon-hidden" />
+      onmousemove={canvasMouseMove}
+      onmousedown={canvasMouseDown}
+      onmouseup={canvasMouseUp}
+      onmouseleave={canvasMouseLeave}
+      oncontextmenu={ev => ev.preventDefault()}
+      onkeydown={stopPropagation(canvasKeyChange)}
+      onkeyup={stopPropagation(canvasKeyChange)}
+></canvas>
+    <canvas bind:this={moduleCanvas} id="module-icon-hidden"></canvas>
   </div>
 </div>
 
