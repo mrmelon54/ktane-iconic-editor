@@ -15,19 +15,19 @@
   "author": "MrMelon54 <github@mrmelon54.com>",
   "license": "GNU GPLv3",
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^2.0.4",
+    "@sveltejs/vite-plugin-svelte": "^2.5.3",
     "@tsconfig/svelte": "^4.0.1",
-    "@types/file-saver": "^2.0.5",
+    "@types/file-saver": "^2.0.7",
     "file-saver": "^2.0.5",
-    "prettier": "^2.8.7",
-    "prettier-plugin-svelte": "^2.10.0",
-    "sass": "^1.62.0",
-    "svelte": "^5.53.5",
-    "svelte-preprocess": "^5.0.3",
-    "typescript": "^5.0.4",
+    "prettier": "^2.8.8",
+    "prettier-plugin-svelte": "^2.10.1",
+    "sass": "^1.99.0",
+    "svelte": "^5.55.4",
+    "svelte-preprocess": "^5.1.4",
+    "typescript": "^5.9.3",
     "vite": "^6.4.2"
   },
   "dependencies": {
-    "svelte-dnd-action": "^0.9.24"
+    "svelte-dnd-action": "^0.9.69"
   }
 }
