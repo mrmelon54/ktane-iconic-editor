@@ -834,10 +834,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"devalue@npm:^5.6.4":
-  version: 5.7.1
-  resolution: "devalue@npm:5.7.1"
-  checksum: d3f1a204c167af1b61433478e29ab005ee537de5ad5b1c5afacc88828d3e4f02e15ba7018015a77c87a97e7925cc757daf91c5d0aa2175ac440c46ea55f21be4
+"devalue@npm:^5.8.1":
+  version: 5.8.1
+  resolution: "devalue@npm:5.8.1"
+  checksum: 344fdf2e90f19319ead25078984e008e15db9bdad8f073c38d08b09c4a8127968c33e1307699e8f0525f29ab00b3e57b54ba7d4b22efcd346092a93b0b1d61d5
   languageName: node
   linkType: hard
 
@@ -1198,7 +1198,7 @@ __metadata:
     prettier: ^2.8.8
     prettier-plugin-svelte: ^2.10.1
     sass: ^1.99.0
-    svelte: ^5.55.4
+    svelte: ^5.55.7
     svelte-dnd-action: ^0.9.69
     svelte-preprocess: ^5.1.4
     typescript: ^5.9.3
@@ -1845,27 +1845,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"svelte@npm:^5.55.4":
-  version: 5.55.4
-  resolution: "svelte@npm:5.55.4"
+"svelte@npm:^5.55.7":
+  version: 5.55.7
+  resolution: "svelte@npm:5.55.7"
   dependencies:
-    "@jridgewell/remapping": "npm:^2.3.4"
-    "@jridgewell/sourcemap-codec": "npm:^1.5.0"
-    "@sveltejs/acorn-typescript": "npm:^1.0.5"
-    "@types/estree": "npm:^1.0.5"
-    "@types/trusted-types": "npm:^2.0.7"
-    acorn: "npm:^8.12.1"
-    aria-query: "npm:5.3.1"
-    axobject-query: "npm:^4.1.0"
-    clsx: "npm:^2.1.1"
-    devalue: "npm:^5.6.4"
-    esm-env: "npm:^1.2.1"
-    esrap: "npm:^2.2.4"
-    is-reference: "npm:^3.0.3"
-    locate-character: "npm:^3.0.0"
-    magic-string: "npm:^0.30.11"
-    zimmerframe: "npm:^1.1.2"
-  checksum: 96abdb07483c0c43408ebe14e4664312137a3b98f4fbe445d47c1cd5a6aa93fafc7a80461909a4e3e47f430ef351e880b3980a67b1ea39dc119663c6be396651
+    "@jridgewell/remapping": ^2.3.4
+    "@jridgewell/sourcemap-codec": ^1.5.0
+    "@sveltejs/acorn-typescript": ^1.0.5
+    "@types/estree": ^1.0.5
+    "@types/trusted-types": ^2.0.7
+    acorn: ^8.12.1
+    aria-query: 5.3.1
+    axobject-query: ^4.1.0
+    clsx: ^2.1.1
+    devalue: ^5.8.1
+    esm-env: ^1.2.1
+    esrap: ^2.2.4
+    is-reference: ^3.0.3
+    locate-character: ^3.0.0
+    magic-string: ^0.30.11
+    zimmerframe: ^1.1.2
+  checksum: 1cde7c0c9be3c8ada9d275ea6eb42231db1450a281d278d150d957fad10c05384ecee941558c2cf3e75b59a3e9c368c47e0f59e2e7871e49d4314101a31949ec
   languageName: node
   linkType: hard
 
