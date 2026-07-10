@@ -29,5 +29,6 @@
   },
   "dependencies": {
     "svelte-dnd-action": "^0.9.70"
-  }
+  },
+  "packageManager": "yarn@4.17.1"
 }
