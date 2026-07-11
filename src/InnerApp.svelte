@@ -62,7 +62,16 @@
   }
 </script>
 
-<div id="content" ondragenter={dragEnter} ondragover={dragEnter} ondragleave={dragLeave} ondrop={handleDrop} bind:this={dropArea}>
+<div
+  id="content"
+  ondragenter={dragEnter}
+  ondragover={dragEnter}
+  ondragleave={dragLeave}
+  ondrop={handleDrop}
+  bind:this={dropArea}
+  role="button"
+  tabindex="0"
+>
   <div id="left-tools"></div>
   <div id="icon-view">
     <IconView />

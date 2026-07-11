@@ -133,11 +133,20 @@
         break;
       default:
         infoTitle = "";
-        infoBody = "";
+        infoBody = [];
         showInfoDialog = false;
         break;
     }
   }
+
+  $effect(() => {
+    if ($selectedModule < 0) {
+      $selectedModule = 0;
+    }
+    if ($selectedModule >= $iconicData.modules.length) {
+      $selectedModule = $iconicData.modules.length - 1;
+    }
+  });
 </script>
 
 <svelte:window onkeydown={pressArrowKey} />
@@ -156,9 +165,7 @@
     {#if $iconicData.modules.length === 0}
       <div class="full">No modules to select</div>
     {:else if $selectedModule < 0 || $selectedModule >= $iconicData.modules.length}
-      <button class="btn" onclick={() => ($selectedModule = 0)}><img src={leftIcon} alt="Left" title="Left" /></button>
       <div class="full">Invalid module selected</div>
-      {selectedModule.set(0)}
     {:else}
       {@const modName = getModuleById($iconicData.modules[$selectedModule].key)?.Name || "Unknown Module"}
       <button class="btn" onclick={leftAction}><img src={leftIcon} alt="Left" title="Left" /></button>
