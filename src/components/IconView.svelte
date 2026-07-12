@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {onMount} from "svelte";
+  import {onMount, setContext} from "svelte";
 
   import {getCurrentModuleString, getIconUrl, getPartChar, getPartColorByChar, hoveredChar, selectedChar, selectedModule} from "~/stores/editor-data";
   import {iconicData, type iconicDataPart, type iconicDataType} from "~/stores/iconic-data";
@@ -12,7 +12,9 @@
   let imData: ImageData = $state();
   let imPix = $derived((x: number, y: number, i: number) => imData.data[y * 32 * 4 + x * 4 + i]);
   let C: HTMLCanvasElement = $state();
-  let moduleRaw = $derived(getCurrentModuleString($iconicData, $selectedModule));
+  let moduleRaw = $state("");
+
+  setContext("moduleRaw", () => getCurrentModuleString($iconicData, $selectedModule));
 
   let parts: Map<string, iconicDataPart> = new Map();
 

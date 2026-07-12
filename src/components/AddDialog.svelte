@@ -8,20 +8,17 @@
     close: () => void;
   }
 
-  let { close }: Props = $props();
+  let {close}: Props = $props();
 
   let rawModuleData = getRawModuleData();
   let modulesToAdd: Set<jsonRawModule> = $state(new Set());
   let usedModules: KeyMap<string> = $state(new KeyMap());
 
   let ktaneIconicModules: KeyMap<string> = $derived(new KeyMap($iconicData.modules.map(x => x.key)));
-  
 
-  let filteredModuleList: jsonRawModule[] = $derived(rawModuleData.KtaneModules.filter(x => !ktaneIconicModules.has(x.ModuleID) && !usedModules.has(x.ModuleID)));
-
-  function selectedModule(e: CustomEvent<any>): void {
-    addSingleModule(e.detail);
-  }
+  let filteredModuleList: jsonRawModule[] = $derived(
+    rawModuleData.KtaneModules.filter(x => !ktaneIconicModules.has(x.ModuleID) && !usedModules.has(x.ModuleID)),
+  );
 
   function addSingleModule(e: jsonRawModule) {
     usedModules.add(e.ModuleID);
@@ -70,7 +67,7 @@
         </div>
       </div>
       <div class="module-search">
-        <ModuleSearchBox moduleList={filteredModuleList} on:select={selectedModule} />
+        <ModuleSearchBox moduleList={filteredModuleList} select={addSingleModule} />
       </div>
       <div class="submit-wrapper">
         <button class="submit-button" onclick={addModules}>Add Modules</button>

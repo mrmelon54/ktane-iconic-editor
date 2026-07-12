@@ -1,15 +1,14 @@
 <script lang="ts">
-  import {createEventDispatcher, onMount} from "svelte";
+  import {onMount} from "svelte";
   import type {jsonRawModule} from "~/stores/ktane-json-raw";
   import TopTools from "./TopTools.svelte";
 
-  const dispatch = createEventDispatcher();
-
   interface Props {
     moduleList?: Array<jsonRawModule>;
+    select(module: jsonRawModule): void;
   }
 
-  let {moduleList = new Array()}: Props = $props();
+  let {moduleList = new Array(), select}: Props = $props();
 
   let inputValue: string = $state("");
   let filteredList: Array<jsonRawModule> = $derived(filterModuleList(inputValue, moduleList));
@@ -21,19 +20,20 @@
 
   function inputKeyPress(event: KeyboardEvent & {currentTarget: EventTarget & HTMLInputElement}) {
     event.stopPropagation();
+    console.log(event);
     switch (event.code) {
       case "Enter":
         event.preventDefault();
-        dispatch("select", filteredList[selectedModule]);
+        select(filteredList[selectedModule]);
         inputValue = "";
         break;
       case "ArrowUp":
         event.preventDefault();
-        selectedModule = fixSelection(selectedModule - 1);
+        selectedModule = fixSelection(selectedModule - 1, filteredList);
         break;
       case "ArrowDown":
         event.preventDefault();
-        selectedModule = fixSelection(selectedModule + 1);
+        selectedModule = fixSelection(selectedModule + 1, filteredList);
         break;
     }
   }

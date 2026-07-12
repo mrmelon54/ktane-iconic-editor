@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run, stopPropagation, preventDefault } from 'svelte/legacy';
-
   import {
     containsMissingPart,
     getCurrentModuleString,
@@ -16,11 +14,15 @@
   let renameMode: {part: iconicDataPart; i: number} | null = $state(null);
   let renameInput: HTMLInputElement = $state();
 
-  run(() => {
+  $effect(() => {
     if (renameInput) {
       renameInput.focus();
       renameInput.select();
     }
+  });
+
+  $effect(() => {
+    console.log(`Changed char: ${selectedChar}`);
   });
 
   function renamePart(value: string, part: iconicDataPart, i: number) {
@@ -37,7 +39,7 @@
     $iconicData = $iconicData;
   }
 
-  function renamePartKeyPress(e: KeyboardEvent & { currentTarget: EventTarget & HTMLInputElement; }) {
+  function renamePartKeyPress(e: KeyboardEvent & {currentTarget: EventTarget & HTMLInputElement}) {
     if (renameMode && e.which === 27) renameMode = null;
   }
 
@@ -46,7 +48,7 @@
     renameMode = null;
   }
 
-  function selectPartKeyPress(e: { key: string; }) {
+  function selectPartKeyPress(e: {key: string}) {
     if (renameMode != null) return;
     let n = getPartByChar(e.key);
     if (n == -1) return;
@@ -86,7 +88,13 @@
   }
 </script>
 
-<svelte:window onkeypress={stopPropagation(selectPartKeyPress)} />
+<svelte:window
+  onkeydown={e => {
+    e.stopPropagation();
+    console.log(`Key press: ${e}`);
+    selectPartKeyPress(e);
+  }}
+/>
 
 <div class="tools">
   {#if $iconicData.modules.length === 0}
@@ -102,8 +110,8 @@
       {@const partChar = getPartChar(i)}
       <button
         class="part-row"
-        class:hovered={$hoveredChar === partChar}
-        class:selected={$selectedChar === partChar}
+        class:hovered={$hoveredChar == partChar}
+        class:selected={$selectedChar == partChar}
         onmouseenter={() => hoveredChar.set(partChar)}
         onmouseleave={() => hoveredChar.set("")}
         onclick={() => (renameMode = {part, i})}
@@ -112,19 +120,29 @@
           <DynamicPartColor moduleIndex={$selectedModule} partIndex={i} />
         </div>
         <div class="part-char">{partChar}</div>
-        {#if renameMode && renameMode.part === part && renameMode.i === i}
+        {#if renameMode && renameMode.part == part && renameMode.i == i}
           <div class="part-rename">
             <input
               type="text"
               value={part.name}
               bind:this={renameInput}
               onblur={() => renamePartBlur()}
-              onkeydown={stopPropagation(e => renamePartKeyPress(e))}
+              onkeydown={e => {
+                e.stopPropagation();
+                renamePartKeyPress(e);
+              }}
             />
           </div>
         {:else}
           <div class="part-name">{part.name}</div>
-          <button class="part-delete" onclick={stopPropagation(preventDefault(() => deletePart(module, part, i)))}></button>
+          <button
+            class="part-delete"
+            onclick={e => {
+              e.stopPropagation();
+              e.preventDefault();
+              deletePart(module, part, i);
+            }}
+          ></button>
         {/if}
       </button>
     {/each}

@@ -140,11 +140,13 @@
   }
 
   $effect(() => {
-    if ($selectedModule < 0) {
-      $selectedModule = 0;
-    }
-    if ($selectedModule >= $iconicData.modules.length) {
-      $selectedModule = $iconicData.modules.length - 1;
+    if ($iconicData.modules.length != 0) {
+      if ($selectedModule < 0) {
+        $selectedModule = 0;
+      }
+      if ($selectedModule >= $iconicData.modules.length) {
+        $selectedModule = $iconicData.modules.length - 1;
+      }
     }
   });
 </script>
